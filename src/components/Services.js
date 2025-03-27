@@ -22,7 +22,7 @@ const SectionHeading = styled(motion.h2)`
   margin-bottom: ${props => props.theme.spacing.xl};
   position: relative;
   display: inline-block;
-  
+
   &:after {
     content: '';
     position: absolute;
@@ -39,6 +39,12 @@ const ServicesList = styled(motion.div)`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.md};
+
+  @media (min-width: 768px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns on larger screens */
+    gap: ${props => props.theme.spacing.lg};
+  }
 `;
 
 const ServiceItem = styled(motion.div)`
@@ -55,6 +61,8 @@ const ServiceItem = styled(motion.div)`
   }
 
   &:hover {
+    background: rgba(255, 255, 255, 0.05); /* Subtle background change */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add shadow */
     .service-arrow {
       transform: translateX(10px);
       color: var(--color-primary);
@@ -71,6 +79,7 @@ const ServiceTitle = styled.h3`
   font-size: 1.5rem;
   font-weight: 500;
   margin-bottom: ${props => props.theme.spacing.sm};
+  color: var(--color-primary);
 `;
 
 const ServiceDescription = styled.p`
@@ -83,30 +92,34 @@ const ServiceArrow = styled.span`
   font-size: 1.5rem;
   transition: transform 0.3s ease, color 0.3s ease;
   margin-top: 8px;
+
+  &:hover {
+    transform: scale(1.2); /* Slightly enlarge the arrow */
+  }
 `;
 
 const Services = () => {
   const services = [
     {
       title: "UI/UX Design",
-      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been."
+      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been.",
     },
     {
       title: "Branding",
-      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been."
+      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been.",
     },
     {
       title: "Animation",
-      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been."
+      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been.",
     },
     {
       title: "3D Design",
-      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been."
+      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been.",
     },
     {
       title: "Graphic Design",
-      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been."
-    }
+      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been.",
+    },
   ];
 
   return (
@@ -120,7 +133,6 @@ const Services = () => {
         >
           Our Services And Works
         </SectionHeading>
-        
         <ServicesList
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -148,4 +160,4 @@ const Services = () => {
   );
 };
 
-export default Services; 
+export default Services;
