@@ -1,11 +1,15 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Link, useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation, Link as RouterLink, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import SessionManager from '../components/SessionManager';
 import { refreshSession } from '../utils/sessionUtils';
 import BlogManagement from './BlogManagement';
+import ProjectManagement from './ProjectManagement';
+import ServiceManagement from './ServiceManagement';
+import AboutManagement from './AboutManagement';
+import DashboardAnalytics from '../components/DashboardAnalytics';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -232,25 +236,25 @@ const AdminDashboard = () => {
         
         <NavSection>
           <NavHeader>Management</NavHeader>
-          <NavLink to="/admin/dashboard" active={isActive('') ? 1 : 0}>
+          <NavLink to="/admin/dashboard" active={isActive('/dashboard') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             Overview
           </NavLink>
-          <NavLink to="/admin/projects" active={isActive('/projects') ? 1 : 0}>
+          <NavLink to="/admin/dashboard/projects" active={isActive('/dashboard/projects') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
             Projects
           </NavLink>
-          <NavLink to="/admin/services" active={isActive('/services') ? 1 : 0}>
+          <NavLink to="/admin/dashboard/services" active={isActive('/dashboard/services') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             Services
           </NavLink>
-          <NavLink to="/admin/blog" active={isActive('/blog') ? 1 : 0}>
+          <NavLink to="/admin/dashboard/blog" active={isActive('/dashboard/blog') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5a2 2 0 00-2 2v10a2 2 0 002 2h5z" />
             </svg>
@@ -258,13 +262,13 @@ const AdminDashboard = () => {
           </NavLink>
           
           <NavHeader style={{ marginTop: '2rem' }}>Content</NavHeader>
-          <NavLink to="/admin/about" active={isActive('/about') ? 1 : 0}>
+          <NavLink to="/admin/dashboard/about" active={isActive('/dashboard/about') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             About
           </NavLink>
-          <NavLink to="/admin/contact" active={isActive('/contact') ? 1 : 0}>
+          <NavLink to="/admin/dashboard/contact" active={isActive('/dashboard/contact') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -303,52 +307,31 @@ const AdminDashboard = () => {
         transition={{ duration: 0.4, delay: 0.2 }}
       >
         <Routes>
-          <Route path="/" element={
+          <Route path="dashboard" element={
             <>
               <ContentHeader>
                 <PageTitle>Dashboard Overview</PageTitle>
               </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Welcome to the Admin Dashboard</h3>
-                <p>Manage your website content from this central location.</p>
-              </ContentCard>
+              <DashboardAnalytics />
             </>
           } />
-          <Route path="/projects" element={
+          <Route path="dashboard/projects" element={
             <>
               <ContentHeader>
                 <PageTitle>Projects Management</PageTitle>
               </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Manage Projects</h3>
-                <p>Add, edit or remove your portfolio projects.</p>
-              </ContentCard>
+              <ProjectManagement />
             </>
           } />
-          <Route path="/services" element={
+          <Route path="dashboard/services" element={
             <>
               <ContentHeader>
                 <PageTitle>Services Management</PageTitle>
               </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Manage Services</h3>
-                <p>Update your service offerings and descriptions.</p>
-              </ContentCard>
+              <ServiceManagement />
             </>
           } />
-          <Route path="/blog" element={
+          <Route path="dashboard/blog" element={
             <>
               <ContentHeader>
                 <PageTitle>Blog Management</PageTitle>
@@ -356,22 +339,15 @@ const AdminDashboard = () => {
               <BlogManagement />
             </>
           } />
-          <Route path="/about" element={
+          <Route path="dashboard/about" element={
             <>
               <ContentHeader>
                 <PageTitle>About Page Editor</PageTitle>
               </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Edit About Content</h3>
-                <p>Update your company profile and team information.</p>
-              </ContentCard>
+              <AboutManagement />
             </>
           } />
-          <Route path="/contact" element={
+          <Route path="dashboard/contact" element={
             <>
               <ContentHeader>
                 <PageTitle>Contact Information</PageTitle>
@@ -386,6 +362,7 @@ const AdminDashboard = () => {
               </ContentCard>
             </>
           } />
+          <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>
       </MainContent>
       

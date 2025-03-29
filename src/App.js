@@ -60,14 +60,7 @@ const AnimationWrapper = () => {
       
       {/* Admin routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
-      <Route
-        path="/admin/*"
-        element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/admin/*" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
       
       {/* 404 route */}
       <Route path="*" element={<NotFound />} />
