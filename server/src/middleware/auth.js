@@ -20,7 +20,7 @@ const auth = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
       // Check if user exists
-      const user = await User.findById(decoded.userId);
+      const user = await User.findById(decoded.id);
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
@@ -30,6 +30,7 @@ const auth = async (req, res, next) => {
       req.token = token;
       next();
     } catch (error) {
+      console.error('Token verification error:', error);
       if (error.name === 'TokenExpiredError') {
         return res.status(401).json({ message: 'Token has expired' });
       }

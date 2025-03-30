@@ -243,7 +243,7 @@ const AdminLogin = () => {
       console.log('Login response:', response);
       
       if (response?.user?.role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/admin');
       } else {
         setLocalError('Access denied. Admin privileges required.');
       }

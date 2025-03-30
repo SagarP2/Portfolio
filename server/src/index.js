@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const bodyParser = require("body-parser");
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -10,12 +11,15 @@ const projectRoutes = require('./routes/projects');
 const serviceRoutes = require('./routes/services');
 const aboutRoutes = require('./routes/about');
 const contactRoutes = require('./routes/contact');
+const contentRoutes = require('./routes/content');
+const blogRoutes = require("./routes/blogRoutes");
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
@@ -24,6 +28,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/content', contentRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)

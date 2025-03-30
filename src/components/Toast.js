@@ -13,11 +13,12 @@ const ToastContainer = styled(motion.div)`
 `;
 
 const Toast = styled(motion.div)`
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
   background: ${props => props.type === 'success' ? props.theme.colors.success : props.theme.colors.error};
   color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -26,29 +27,16 @@ const Toast = styled(motion.div)`
 `;
 
 const Icon = styled.span`
-  font-size: 1.25rem;
-`;
-
-const Message = styled.span`
-  flex: 1;
-`;
-
-const CloseButton = styled.button`
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  &:hover {
-    opacity: 0.8;
-  }
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
 `;
 
-const ToastContext = React.createContext();
+const ToastContext = React.createContext(null);
 
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = React.useState([]);
@@ -56,19 +44,13 @@ export const ToastProvider = ({ children }) => {
   const addToast = (message, type = 'success') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
-    
-    // Auto remove toast after 5 seconds
     setTimeout(() => {
-      removeToast(id);
-    }, 5000);
-  };
-
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 5000); // Auto remove after 5 seconds
   };
 
   return (
-    <ToastContext.Provider value={{ addToast, removeToast }}>
+    <ToastContext.Provider value={{ addToast }}>
       {children}
       <ToastContainer>
         <AnimatePresence>
@@ -76,18 +58,23 @@ export const ToastProvider = ({ children }) => {
             <Toast
               key={toast.id}
               type={toast.type}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 100 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
             >
               <Icon>
-                {toast.type === 'success' ? '✓' : '✕'}
+                {toast.type === 'success' ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
               </Icon>
-              <Message>{toast.message}</Message>
-              <CloseButton onClick={() => removeToast(toast.id)}>
-                ×
-              </CloseButton>
+              {toast.message}
             </Toast>
           ))}
         </AnimatePresence>

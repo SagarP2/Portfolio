@@ -35,9 +35,14 @@ router.post('/register', async (req, res) => {
     await user.save();
     console.log('User saved successfully');
 
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return res.status(500).json({ message: 'Server configuration error' });
+    }
+
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
@@ -63,6 +68,11 @@ router.post('/login', async (req, res) => {
     console.log('Login attempt:', req.body);
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      console.log('Missing credentials');
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     console.log('Finding user...');
     const user = await User.findOne({ email });
     if (!user) {
@@ -78,9 +88,15 @@ router.post('/login', async (req, res) => {
     }
 
     console.log('Login successful for user:', email);
+    
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return res.status(500).json({ message: 'Server configuration error' });
+    }
+
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
@@ -95,7 +111,11 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(400).json({ message: error.message });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'An error occurred during login',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -105,6 +125,7 @@ router.get('/me', auth, async (req, res) => {
     const user = await User.findById(req.user._id).select('-password');
     res.json(user);
   } catch (error) {
+    console.error('Get current user error:', error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -124,6 +145,7 @@ router.patch('/me', auth, async (req, res) => {
     await req.user.save();
     res.json(req.user);
   } catch (error) {
+    console.error('Update user error:', error);
     res.status(400).json({ message: error.message });
   }
 });

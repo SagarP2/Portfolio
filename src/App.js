@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GlobalStyles } from './styles/GlobalStyles';
 import theme from './styles/theme';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './components/Toast';
 import SessionManager from './components/SessionManager';
 
 // Components
@@ -23,6 +24,7 @@ import Services from './pages/Services';
 import ProjectDetail from './pages/ProjectDetail';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import NewContent from './pages/admin/NewContent';
 
 // ScrollToTop component for better scroll management
 const ScrollToTop = () => {
@@ -64,6 +66,7 @@ const AnimationWrapper = () => {
         }
       />
       
+      {/* New content route */}
       {/* 404 route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
@@ -160,9 +163,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyles />
       <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <ToastProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -5,14 +5,12 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import SessionManager from '../components/SessionManager';
 import { refreshSession } from '../utils/sessionUtils';
-<<<<<<< HEAD
 import ProjectManagement from './admin/ProjectManagement';
 import ServiceManagement from './admin/ServiceManagement';
 import AboutManagement from './admin/AboutManagement';
+import ContentManagement from './admin/ContentManagement';
 import DashboardAnalytics from '../components/DashboardAnalytics';
-=======
-import BlogManagement from './BlogManagement';
->>>>>>> parent of 7a8e2981 (projecManagement, sevice management, Dashboard Overview  js file creaete)
+import NewContent from './admin/NewContent';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -200,6 +198,35 @@ const BackToSiteLink = styled(RouterLink)`
   }
 `;
 
+const DashboardCard = styled(motion.div)`
+  background: ${props => props.theme.colors.cardBg};
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  h3 {
+    color: ${props => props.theme.colors.text};
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    color: ${props => props.theme.colors.textSecondary};
+    margin: 0;
+  }
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+`;
+
 const AdminDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -238,7 +265,6 @@ const AdminDashboard = () => {
         </SidebarHeader>
 
         <NavSection>
-<<<<<<< HEAD
           <NavHeader>Main</NavHeader>
           <NavLink to="/admin" active={isActive('/admin')}>
             Dashboard
@@ -252,151 +278,67 @@ const AdminDashboard = () => {
           <NavLink to="/admin/about" active={isActive('/admin/about')}>
             About
           </NavLink>
-=======
-          <NavHeader>Management</NavHeader>
-          <NavLink to="/admin/dashboard" active={isActive('') ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Overview
+          <NavLink to="/admin/content" active={isActive('/admin/content')}>
+            Content
           </NavLink>
-          <NavLink to="/admin/projects" active={isActive('/projects') ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-            Projects
-          </NavLink>
-          <NavLink to="/admin/services" active={isActive('/services') ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            Services
-          </NavLink>
-          <NavLink to="/admin/blog" active={isActive('/blog') ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5a2 2 0 00-2 2v10a2 2 0 002 2h5z" />
-            </svg>
-            Blog
-          </NavLink>
-          
-          <NavHeader style={{ marginTop: '2rem' }}>Content</NavHeader>
-          <NavLink to="/admin/about" active={isActive('/about') ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            About
-          </NavLink>
-          <NavLink to="/admin/contact" active={isActive('/contact') ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            Contact
-          </NavLink>
->>>>>>> parent of 7a8e2981 (projecManagement, sevice management, Dashboard Overview  js file creaete)
         </NavSection>
 
-        <LogoutButton onClick={handleLogout}>
+        <LogoutButton
+          onClick={handleLogout}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
           Logout
         </LogoutButton>
       </Sidebar>
 
-      <MainContent
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.2 }}
-      >
+      <MainContent>
+        <ContentHeader>
+          <PageTitle>Dashboard Overview</PageTitle>
+        </ContentHeader>
+
         <Routes>
-<<<<<<< HEAD
           <Route path="/" element={<DashboardAnalytics />} />
           <Route path="/projects" element={<ProjectManagement />} />
           <Route path="/services" element={<ServiceManagement />} />
           <Route path="/about" element={<AboutManagement />} />
-=======
-          <Route path="/" element={
-            <>
-              <ContentHeader>
-                <PageTitle>Dashboard Overview</PageTitle>
-              </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Welcome to the Admin Dashboard</h3>
-                <p>Manage your website content from this central location.</p>
-              </ContentCard>
-            </>
-          } />
-          <Route path="/projects" element={
-            <>
-              <ContentHeader>
-                <PageTitle>Projects Management</PageTitle>
-              </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Manage Projects</h3>
-                <p>Add, edit or remove your portfolio projects.</p>
-              </ContentCard>
-            </>
-          } />
-          <Route path="/services" element={
-            <>
-              <ContentHeader>
-                <PageTitle>Services Management</PageTitle>
-              </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Manage Services</h3>
-                <p>Update your service offerings and descriptions.</p>
-              </ContentCard>
-            </>
-          } />
-          <Route path="/blog" element={
-            <>
-              <ContentHeader>
-                <PageTitle>Blog Management</PageTitle>
-              </ContentHeader>
-              <BlogManagement />
-            </>
-          } />
-          <Route path="/about" element={
-            <>
-              <ContentHeader>
-                <PageTitle>About Page Editor</PageTitle>
-              </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Edit About Content</h3>
-                <p>Update your company profile and team information.</p>
-              </ContentCard>
-            </>
-          } />
-          <Route path="/contact" element={
-            <>
-              <ContentHeader>
-                <PageTitle>Contact Information</PageTitle>
-              </ContentHeader>
-              <ContentCard
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h3>Edit Contact Details</h3>
-                <p>Update your contact information and social media links.</p>
-              </ContentCard>
-            </>
-          } />
->>>>>>> parent of 7a8e2981 (projecManagement, sevice management, Dashboard Overview  js file creaete)
+          <Route path="/content" element={<ContentManagement />} />
+          <Route path="/content/new" element={<NewContent />} />
         </Routes>
+
+        {location.pathname !== '/admin' && (
+          <BackToSiteButton>
+            <BackToSiteLink to="/admin">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Dashboard
+            </BackToSiteLink>
+          </BackToSiteButton>
+        )}
+
+        <Grid>
+          <DashboardCard
+            onClick={() => navigate('/admin/content')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <h3>Content Management</h3>
+            <p>Manage your website content</p>
+          </DashboardCard>
+
+          <DashboardCard
+            onClick={() => navigate('/admin/content/new')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <h3>Create New Content</h3>
+            <p>Add new content to your website</p>
+          </DashboardCard>
+        </Grid>
       </MainContent>
       <SessionManager />
     </DashboardContainer>

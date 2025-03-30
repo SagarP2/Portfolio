@@ -2,6 +2,35 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { saveSession, getSession, clearSession, refreshSession, isSessionActive } from '../utils/sessionUtils';
 
+// Configure axios defaults
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+
+// Add request interceptor to add auth token
+axios.interceptors.request.use(
+  (config) => {
+    const session = getSession();
+    if (session?.token) {
+      config.headers.Authorization = `Bearer ${session.token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle token errors
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      clearSession();
+      window.location.href = '/admin/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -46,9 +75,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async (token) => {
     try {
-      const response = await axios.get('http://localhost:5001/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get('/api/auth/me');
       setUser(response.data);
       return response.data;
     } catch (error) {
@@ -61,7 +88,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, rememberMe = false) => {
     try {
       setError(null);
-      const response = await axios.post('http://localhost:5001/api/auth/login', {
+      const response = await axios.post('/api/auth/login', {
         email,
         password
       });
