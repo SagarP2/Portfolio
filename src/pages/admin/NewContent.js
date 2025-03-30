@@ -149,6 +149,8 @@ const NewContent = () => {
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : []
       };
 
+      console.log('Submitting content data:', contentData);
+
       // Send the request
       await axios.post('/api/content', contentData);
       

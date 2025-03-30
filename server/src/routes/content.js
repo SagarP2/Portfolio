@@ -56,7 +56,7 @@ router.post('/', auth, isAdmin, async (req, res) => {
       content: req.body.content.trim(),
       author: req.body.author.trim(),
       date: req.body.date,
-      tags: req.body.tags ? JSON.parse(req.body.tags) : []
+      tags: Array.isArray(req.body.tags) ? req.body.tags : []
     };
 
     console.log('Content data to save:', contentData);
