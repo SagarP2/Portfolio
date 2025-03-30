@@ -25,6 +25,8 @@ import ProjectDetail from './pages/ProjectDetail';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import NewContent from './pages/admin/NewContent';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 
 // ScrollToTop component for better scroll management
 const ScrollToTop = () => {
@@ -54,6 +56,8 @@ const AnimationWrapper = () => {
       <Route path="/projects/:id" element={<ProjectDetail />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/services" element={<Services />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:id" element={<BlogPost />} />
       
       {/* Admin routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
