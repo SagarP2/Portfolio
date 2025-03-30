@@ -1,15 +1,18 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Link, useNavigate, useLocation, Link as RouterLink, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import SessionManager from '../components/SessionManager';
 import { refreshSession } from '../utils/sessionUtils';
-import BlogManagement from './BlogManagement';
-import ProjectManagement from './ProjectManagement';
-import ServiceManagement from './ServiceManagement';
-import AboutManagement from './AboutManagement';
+<<<<<<< HEAD
+import ProjectManagement from './admin/ProjectManagement';
+import ServiceManagement from './admin/ServiceManagement';
+import AboutManagement from './admin/AboutManagement';
 import DashboardAnalytics from '../components/DashboardAnalytics';
+=======
+import BlogManagement from './BlogManagement';
+>>>>>>> parent of 7a8e2981 (projecManagement, sevice management, Dashboard Overview  js file creaete)
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -198,63 +201,78 @@ const BackToSiteLink = styled(RouterLink)`
 `;
 
 const AdminDashboard = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Check authentication on mount and redirect if not authenticated
+
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate('/admin/login');
-    } else {
-      // Refresh session when dashboard loads
-      refreshSession();
-    }
-  }, [isAuthenticated, navigate]);
-  
+    const checkSession = async () => {
+      try {
+        await refreshSession();
+      } catch (error) {
+        console.error('Session refresh failed:', error);
+        navigate('/admin/login');
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
+
   const handleLogout = () => {
     logout();
     navigate('/admin/login');
   };
-  
-  const isActive = (path) => {
-    return location.pathname === '/admin/dashboard' + path;
-  };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <DashboardContainer>
       <BackgroundGradient />
-      
       <Sidebar
-        initial={{ x: -50, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.4 }}
+        initial={{ x: -280 }}
+        animate={{ x: 0 }}
+        transition={{ type: "spring", stiffness: 100 }}
       >
         <SidebarHeader>
           <DashboardTitle>Admin Panel</DashboardTitle>
         </SidebarHeader>
-        
+
         <NavSection>
+<<<<<<< HEAD
+          <NavHeader>Main</NavHeader>
+          <NavLink to="/admin" active={isActive('/admin')}>
+            Dashboard
+          </NavLink>
+          <NavLink to="/admin/projects" active={isActive('/admin/projects')}>
+            Projects
+          </NavLink>
+          <NavLink to="/admin/services" active={isActive('/admin/services')}>
+            Services
+          </NavLink>
+          <NavLink to="/admin/about" active={isActive('/admin/about')}>
+            About
+          </NavLink>
+=======
           <NavHeader>Management</NavHeader>
-          <NavLink to="/admin/dashboard" active={isActive('/dashboard') ? 1 : 0}>
+          <NavLink to="/admin/dashboard" active={isActive('') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             Overview
           </NavLink>
-          <NavLink to="/admin/dashboard/projects" active={isActive('/dashboard/projects') ? 1 : 0}>
+          <NavLink to="/admin/projects" active={isActive('/projects') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
             Projects
           </NavLink>
-          <NavLink to="/admin/dashboard/services" active={isActive('/dashboard/services') ? 1 : 0}>
+          <NavLink to="/admin/services" active={isActive('/services') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             Services
           </NavLink>
-          <NavLink to="/admin/dashboard/blog" active={isActive('/dashboard/blog') ? 1 : 0}>
+          <NavLink to="/admin/blog" active={isActive('/blog') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5a2 2 0 00-2 2v10a2 2 0 002 2h5z" />
             </svg>
@@ -262,76 +280,84 @@ const AdminDashboard = () => {
           </NavLink>
           
           <NavHeader style={{ marginTop: '2rem' }}>Content</NavHeader>
-          <NavLink to="/admin/dashboard/about" active={isActive('/dashboard/about') ? 1 : 0}>
+          <NavLink to="/admin/about" active={isActive('/about') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             About
           </NavLink>
-          <NavLink to="/admin/dashboard/contact" active={isActive('/dashboard/contact') ? 1 : 0}>
+          <NavLink to="/admin/contact" active={isActive('/contact') ? 1 : 0}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             Contact
           </NavLink>
+>>>>>>> parent of 7a8e2981 (projecManagement, sevice management, Dashboard Overview  js file creaete)
         </NavSection>
-        
-        <LogoutButton 
-          onClick={handleLogout}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
+
+        <LogoutButton onClick={handleLogout}>
           Logout
         </LogoutButton>
-        
-        <BackToSiteButton
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.4 }}
-        >
-          <BackToSiteLink to="/">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            View Website
-          </BackToSiteLink>
-        </BackToSiteButton>
       </Sidebar>
-      
+
       <MainContent
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
       >
         <Routes>
-          <Route path="dashboard" element={
+<<<<<<< HEAD
+          <Route path="/" element={<DashboardAnalytics />} />
+          <Route path="/projects" element={<ProjectManagement />} />
+          <Route path="/services" element={<ServiceManagement />} />
+          <Route path="/about" element={<AboutManagement />} />
+=======
+          <Route path="/" element={
             <>
               <ContentHeader>
                 <PageTitle>Dashboard Overview</PageTitle>
               </ContentHeader>
-              <DashboardAnalytics />
+              <ContentCard
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <h3>Welcome to the Admin Dashboard</h3>
+                <p>Manage your website content from this central location.</p>
+              </ContentCard>
             </>
           } />
-          <Route path="dashboard/projects" element={
+          <Route path="/projects" element={
             <>
               <ContentHeader>
                 <PageTitle>Projects Management</PageTitle>
               </ContentHeader>
-              <ProjectManagement />
+              <ContentCard
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <h3>Manage Projects</h3>
+                <p>Add, edit or remove your portfolio projects.</p>
+              </ContentCard>
             </>
           } />
-          <Route path="dashboard/services" element={
+          <Route path="/services" element={
             <>
               <ContentHeader>
                 <PageTitle>Services Management</PageTitle>
               </ContentHeader>
-              <ServiceManagement />
+              <ContentCard
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <h3>Manage Services</h3>
+                <p>Update your service offerings and descriptions.</p>
+              </ContentCard>
             </>
           } />
-          <Route path="dashboard/blog" element={
+          <Route path="/blog" element={
             <>
               <ContentHeader>
                 <PageTitle>Blog Management</PageTitle>
@@ -339,15 +365,22 @@ const AdminDashboard = () => {
               <BlogManagement />
             </>
           } />
-          <Route path="dashboard/about" element={
+          <Route path="/about" element={
             <>
               <ContentHeader>
                 <PageTitle>About Page Editor</PageTitle>
               </ContentHeader>
-              <AboutManagement />
+              <ContentCard
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <h3>Edit About Content</h3>
+                <p>Update your company profile and team information.</p>
+              </ContentCard>
             </>
           } />
-          <Route path="dashboard/contact" element={
+          <Route path="/contact" element={
             <>
               <ContentHeader>
                 <PageTitle>Contact Information</PageTitle>
@@ -362,11 +395,9 @@ const AdminDashboard = () => {
               </ContentCard>
             </>
           } />
-          <Route path="*" element={<Navigate to="dashboard" replace />} />
+>>>>>>> parent of 7a8e2981 (projecManagement, sevice management, Dashboard Overview  js file creaete)
         </Routes>
       </MainContent>
-      
-      {/* Session manager for handling inactivity timeouts */}
       <SessionManager />
     </DashboardContainer>
   );

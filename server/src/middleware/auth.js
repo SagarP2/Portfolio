@@ -3,35 +3,60 @@ const User = require('../models/User');
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    // Check if Authorization header exists
+    const authHeader = req.header('Authorization');
+    if (!authHeader) {
+      return res.status(401).json({ message: 'No authentication token provided' });
+    }
+
+    // Check if token format is correct
+    if (!authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Invalid token format' });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
     
-    if (!token) {
-      throw new Error();
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Check if user exists
+      const user = await User.findById(decoded.userId);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      // Add user to request object
+      req.user = user;
+      req.token = token;
+      next();
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: 'Token has expired' });
+      }
+      if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      throw error;
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    const user = await User.findOne({ _id: decoded.id });
-
-    if (!user) {
-      throw new Error();
-    }
-
-    req.user = user;
-    req.token = token;
-    next();
   } catch (error) {
-    res.status(401).json({ message: 'Please authenticate.' });
+    console.error('Auth middleware error:', error);
+    res.status(401).json({ message: 'Authentication failed' });
   }
 };
 
 const isAdmin = async (req, res, next) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied. Admin only.' });
     }
     next();
   } catch (error) {
-    res.status(500).json({ message: 'Server error.' });
+    console.error('Admin middleware error:', error);
+    res.status(403).json({ message: 'Access denied' });
   }
 };
 

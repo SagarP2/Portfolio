@@ -10,30 +10,44 @@ const USER_KEY = 'admin_user';
 
 // Save session data
 export const saveSession = (userData, token, remember = false) => {
-  // Determine expiration (7 days by default, 30 days if remember me is checked)
-  const expiryDays = remember ? 30 : 7;
-  
-  // Store the token in a cookie
-  setCookie(TOKEN_KEY, token, expiryDays);
-  
-  // Store serialized user data in a cookie
-  setCookie(USER_KEY, JSON.stringify(userData), expiryDays);
-  
-  // Store session timestamp
-  const session = {
-    createdAt: new Date().getTime(),
-    expiryDays: expiryDays,
-    remember: remember,
-  };
-  
-  setCookie(SESSION_KEY, JSON.stringify(session), expiryDays);
-  
-  // Also store in localStorage as backup
-  localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(userData));
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  
-  return { userData, token, session };
+  try {
+    // Validate inputs
+    if (!userData || !token) {
+      throw new Error('Invalid session data');
+    }
+
+    // Remove 'Bearer ' prefix if it exists before storing
+    const cleanToken = token.replace('Bearer ', '');
+    
+    // Determine expiration (7 days by default, 30 days if remember me is checked)
+    const expiryDays = remember ? 30 : 7;
+    
+    // Store the token in a cookie with secure settings
+    setCookie(TOKEN_KEY, cleanToken, expiryDays);
+    
+    // Store serialized user data in a cookie
+    setCookie(USER_KEY, JSON.stringify(userData), expiryDays);
+    
+    // Store session timestamp
+    const session = {
+      createdAt: new Date().getTime(),
+      expiryDays: expiryDays,
+      remember: remember,
+    };
+    
+    setCookie(SESSION_KEY, JSON.stringify(session), expiryDays);
+    
+    // Also store in localStorage as backup
+    localStorage.setItem(TOKEN_KEY, cleanToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(userData));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    
+    return { userData, token: cleanToken, session };
+  } catch (error) {
+    console.error('Error saving session:', error);
+    clearSession();
+    return null;
+  }
 };
 
 // Get current session data
@@ -65,6 +79,7 @@ export const getSession = () => {
       return null;
     }
     
+    // Return token without 'Bearer ' prefix
     return { userData, token, session };
   } catch (error) {
     console.error('Error parsing session data:', error);
@@ -75,15 +90,19 @@ export const getSession = () => {
 
 // Clear session data
 export const clearSession = () => {
-  // Clear cookies
-  removeCookie(TOKEN_KEY);
-  removeCookie(USER_KEY);
-  removeCookie(SESSION_KEY);
-  
-  // Clear localStorage
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
-  localStorage.removeItem(SESSION_KEY);
+  try {
+    // Clear cookies
+    removeCookie(TOKEN_KEY);
+    removeCookie(USER_KEY);
+    removeCookie(SESSION_KEY);
+    
+    // Clear localStorage
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(SESSION_KEY);
+  } catch (error) {
+    console.error('Error clearing session:', error);
+  }
 };
 
 // Check if session is active
@@ -94,16 +113,16 @@ export const isSessionActive = () => {
 
 // Refresh session (update timestamp)
 export const refreshSession = () => {
-  const currentSession = getSession();
-  if (currentSession) {
-    const { userData, token, session } = currentSession;
-    session.createdAt = new Date().getTime();
-    
-    // Update cookies and localStorage
-    setCookie(SESSION_KEY, JSON.stringify(session), session.expiryDays);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    
-    return currentSession;
+  try {
+    const currentSession = getSession();
+    if (currentSession) {
+      const { userData, token, session } = currentSession;
+      session.createdAt = new Date().getTime();
+      return saveSession(userData, token, session.remember);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error refreshing session:', error);
+    return null;
   }
-  return null;
 }; 

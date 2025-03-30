@@ -23,9 +23,6 @@ import Services from './pages/Services';
 import ProjectDetail from './pages/ProjectDetail';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
-import Blog from './pages/Blog';
-import BlogDetail from './pages/BlogDetail';
-import BlogManagement from './pages/BlogManagement';
 
 // ScrollToTop component for better scroll management
 const ScrollToTop = () => {
@@ -55,12 +52,17 @@ const AnimationWrapper = () => {
       <Route path="/projects/:id" element={<ProjectDetail />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/services" element={<Services />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:id" element={<BlogDetail />} />
       
       {/* Admin routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin/*" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
       
       {/* 404 route */}
       <Route path="*" element={<NotFound />} />
