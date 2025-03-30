@@ -198,96 +198,143 @@ const BackToSiteLink = styled(RouterLink)`
   }
 `;
 
-const DashboardCard = styled(motion.div)`
-  background: ${props => props.theme.colors.cardBg};
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: transform 0.2s ease;
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+`;
 
-  &:hover {
-    transform: translateY(-2px);
+const DashboardCard = styled(motion.div)`
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: ${props => props.theme.gradients.primary};
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+  }
+
+  &:hover::before {
+    opacity: 0.05;
   }
 
   h3 {
     color: ${props => props.theme.colors.text};
-    margin: 0 0 0.5rem;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 1;
   }
 
   p {
     color: ${props => props.theme.colors.textSecondary};
     margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    z-index: 1;
+  }
+
+  svg {
+    width: 32px;
+    height: 32px;
+    color: ${props => props.theme.colors.primary};
   }
 `;
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+const ManagementCard = styled(motion.div)`
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+  h2 {
+    color: ${props => props.theme.colors.text};
+    margin: 0 0 1.5rem;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
 `;
 
 const AdminDashboard = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        await refreshSession();
-      } catch (error) {
-        console.error('Session refresh failed:', error);
-        navigate('/admin/login');
-      }
-    };
-
-    checkSession();
-  }, [navigate]);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/admin/login');
-  };
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const isActive = (path) => location.pathname === path;
 
   return (
     <DashboardContainer>
       <BackgroundGradient />
-      <Sidebar
-        initial={{ x: -280 }}
-        animate={{ x: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-      >
+      <Sidebar>
         <SidebarHeader>
-          <DashboardTitle>Admin Panel</DashboardTitle>
+          <DashboardTitle>Admin Dashboard</DashboardTitle>
         </SidebarHeader>
-
         <NavSection>
           <NavHeader>Main</NavHeader>
           <NavLink to="/admin" active={isActive('/admin')}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
             Dashboard
           </NavLink>
+          <NavHeader>Management</NavHeader>
+          <NavLink to="/admin/blog" active={isActive('/admin/blog')}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15" />
+            </svg>
+            Blog
+          </NavLink>
           <NavLink to="/admin/projects" active={isActive('/admin/projects')}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
             Projects
           </NavLink>
           <NavLink to="/admin/services" active={isActive('/admin/services')}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
             Services
           </NavLink>
           <NavLink to="/admin/about" active={isActive('/admin/about')}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             About
           </NavLink>
-          <NavLink to="/admin/content" active={isActive('/admin/content')}>
-            Content
-          </NavLink>
         </NavSection>
-
-        <LogoutButton
-          onClick={handleLogout}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
+        <LogoutButton onClick={logout}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
@@ -296,51 +343,149 @@ const AdminDashboard = () => {
       </Sidebar>
 
       <MainContent>
-        <ContentHeader>
-          <PageTitle>Dashboard Overview</PageTitle>
-        </ContentHeader>
-
         <Routes>
-          <Route path="/" element={<DashboardAnalytics />} />
-          <Route path="/projects" element={<ProjectManagement />} />
-          <Route path="/services" element={<ServiceManagement />} />
-          <Route path="/about" element={<AboutManagement />} />
-          <Route path="/content" element={<ContentManagement />} />
-          <Route path="/content/new" element={<NewContent />} />
+          <Route path="/" element={
+            <>
+              <ContentHeader>
+                <PageTitle>Dashboard Overview</PageTitle>
+              </ContentHeader>
+              <DashboardAnalytics />
+              <Grid>
+                <DashboardCard
+                  onClick={() => navigate('/admin/blog')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15" />
+                    </svg>
+                    Blog Management
+                  </h3>
+                  <p>Create and manage your blog posts, categories, and content</p>
+                </DashboardCard>
+
+                <DashboardCard
+                  onClick={() => navigate('/admin/projects')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    Project Management
+                  </h3>
+                  <p>Showcase and organize your portfolio projects and case studies</p>
+                </DashboardCard>
+
+                <DashboardCard
+                  onClick={() => navigate('/admin/services')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Service Management
+                  </h3>
+                  <p>Update and maintain your professional services and offerings</p>
+                </DashboardCard>
+
+                <DashboardCard
+                  onClick={() => navigate('/admin/about')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    About Management
+                  </h3>
+                  <p>Edit your profile, skills, experience, and personal information</p>
+                </DashboardCard>
+              </Grid>
+            </>
+          } />
+          <Route path="blog" element={
+            <ManagementCard
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15" />
+                </svg>
+                Blog Management
+              </h2>
+              <ContentManagement />
+            </ManagementCard>
+          } />
+          <Route path="blog/new" element={
+            <ManagementCard
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                New Blog Post
+              </h2>
+              <NewContent />
+            </ManagementCard>
+          } />
+          <Route path="projects" element={
+            <ManagementCard
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Project Management
+              </h2>
+              <ProjectManagement />
+            </ManagementCard>
+          } />
+          <Route path="services" element={
+            <ManagementCard
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Service Management
+              </h2>
+              <ServiceManagement />
+            </ManagementCard>
+          } />
+          <Route path="about" element={
+            <ManagementCard
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                About Management
+              </h2>
+              <AboutManagement />
+            </ManagementCard>
+          } />
         </Routes>
-
-        {location.pathname !== '/admin' && (
-          <BackToSiteButton>
-            <BackToSiteLink to="/admin">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Dashboard
-            </BackToSiteLink>
-          </BackToSiteButton>
-        )}
-
-        <Grid>
-          <DashboardCard
-            onClick={() => navigate('/admin/content')}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <h3>Content Management</h3>
-            <p>Manage your website content</p>
-          </DashboardCard>
-
-          <DashboardCard
-            onClick={() => navigate('/admin/content/new')}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <h3>Create New Content</h3>
-            <p>Add new content to your website</p>
-          </DashboardCard>
-        </Grid>
       </MainContent>
-      <SessionManager />
     </DashboardContainer>
   );
 };

@@ -33,10 +33,11 @@ const upload = multer({
 // Get all projects
 router.get('/', async (req, res) => {
   try {
-    const projects = await Project.find().sort({ order: 1, createdAt: -1 });
+    const projects = await Project.find().sort({ date: -1 });
     res.json(projects);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching projects:', error);
+    res.status(500).json({ message: 'Error fetching projects' });
   }
 });
 
@@ -49,80 +50,73 @@ router.get('/:id', async (req, res) => {
     }
     res.json(project);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching project:', error);
+    res.status(500).json({ message: 'Error fetching project' });
   }
 });
 
 // Create project (protected)
-router.post('/', auth, upload.array('images', 5), async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
-    const projectData = req.body;
+    const { title, description, technologies, imageUrl, projectUrl, githubUrl, date } = req.body;
     
-    // Handle image uploads
-    if (req.files && req.files.length > 0) {
-      projectData.images = req.files.map(file => ({
-        url: `/uploads/projects/${file.filename}`,
-        caption: ''
-      }));
-      projectData.featuredImage = projectData.images[0].url;
-    }
+    const project = new Project({
+      title,
+      description,
+      technologies,
+      imageUrl,
+      projectUrl,
+      githubUrl,
+      date: date || new Date()
+    });
 
-    const project = new Project(projectData);
     await project.save();
     res.status(201).json(project);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error creating project:', error);
+    res.status(500).json({ message: 'Error creating project' });
   }
 });
 
 // Update project (protected)
-router.patch('/:id', auth, upload.array('images', 5), async (req, res) => {
-  const updates = Object.keys(req.body);
-  const allowedUpdates = [
-    'title', 'description', 'shortDescription', 'technologies',
-    'client', 'projectUrl', 'githubUrl', 'startDate', 'endDate',
-    'status', 'featured', 'order'
-  ];
-  const isValidOperation = updates.every(update => allowedUpdates.includes(update));
-
-  if (!isValidOperation) {
-    return res.status(400).json({ message: 'Invalid updates' });
-  }
-
+router.put('/:id', auth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    // Handle image uploads
-    if (req.files && req.files.length > 0) {
-      const newImages = req.files.map(file => ({
-        url: `/uploads/projects/${file.filename}`,
-        caption: ''
-      }));
-      project.images = [...project.images, ...newImages];
-    }
+    const { title, description, technologies, imageUrl, projectUrl, githubUrl, date } = req.body;
+    
+    project.title = title || project.title;
+    project.description = description || project.description;
+    project.technologies = technologies || project.technologies;
+    project.imageUrl = imageUrl || project.imageUrl;
+    project.projectUrl = projectUrl || project.projectUrl;
+    project.githubUrl = githubUrl || project.githubUrl;
+    project.date = date || project.date;
 
-    updates.forEach(update => project[update] = req.body[update]);
     await project.save();
     res.json(project);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error updating project:', error);
+    res.status(500).json({ message: 'Error updating project' });
   }
 });
 
 // Delete project (protected)
-router.delete('/:id', auth, isAdmin, async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
-    await project.remove();
+
+    await project.deleteOne();
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error deleting project:', error);
+    res.status(500).json({ message: 'Error deleting project' });
   }
 });
 

@@ -10,68 +10,26 @@ const projectSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  shortDescription: {
-    type: String,
-    required: true,
-    maxlength: 200
-  },
-  technologies: [{
-    type: String,
-    required: true
-  }],
-  images: [{
-    url: String,
-    caption: String
-  }],
-  featuredImage: {
-    type: String,
+  technologies: {
+    type: [String],
     required: true
   },
-  client: {
+  imageUrl: {
     type: String,
     required: true
   },
   projectUrl: {
-    type: String,
-    required: true
+    type: String
   },
   githubUrl: {
     type: String
   },
-  startDate: {
-    type: Date,
-    required: true
-  },
-  endDate: {
-    type: Date
-  },
-  status: {
-    type: String,
-    enum: ['completed', 'in-progress', 'planned'],
-    default: 'completed'
-  },
-  featured: {
-    type: Boolean,
-    default: false
-  },
-  order: {
-    type: Number,
-    default: 0
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
+  date: {
     type: Date,
     default: Date.now
   }
-});
-
-// Update the updatedAt timestamp before saving
-projectSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Project', projectSchema); 
