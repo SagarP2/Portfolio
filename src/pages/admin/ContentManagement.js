@@ -296,25 +296,34 @@ const ContentManagement = () => {
         content: formData.content.trim(),
         author: formData.author.trim(),
         date: formData.date,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : []
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+        ...(formData.image && { image: formData.image.trim() }) // Include image if provided
       };
 
-      console.log('Submitting content data:', contentData);
+      console.log('Content data to be submitted:', contentData);
+      console.log('Editing content ID:', editingContent?._id);
 
       if (editingContent) {
-        await axios.patch(`/api/content/${editingContent._id}`, contentData);
+        console.log('Updating existing content...');
+        const response = await axios.patch(`/api/content/${editingContent._id}`, contentData);
+        console.log('Update response:', response.data);
         addToast('Content updated successfully', 'success');
       } else {
+        console.log('Creating new content...');
         const response = await axios.post('/api/content', contentData);
-        console.log('Server response:', response.data);
+        console.log('Create response:', response.data);
         addToast('Content saved successfully', 'success');
       }
 
       handleCloseModal();
       fetchContents();
     } catch (error) {
-      console.error('Error saving content:', error);
-      console.error('Error response:', error.response?.data);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
       
       let errorMessage = 'Failed to save content. Please try again.';
       
@@ -402,6 +411,9 @@ const ContentManagement = () => {
       <ContentGrid>
         {contents.map(content => (
           <ContentCard key={content._id}>
+            {content.image && (
+              <ContentImage src={content.image} alt={content.title} />
+            )}
             <ContentContent>
               <ContentTitle>{content.title}</ContentTitle>
               <ContentText>{content.content.substring(0, 150)}...</ContentText>
@@ -487,6 +499,17 @@ const ContentManagement = () => {
               </FormGroup>
 
               <FormGroup>
+                <Label htmlFor="image">Image URL</Label>
+                <Input
+                  type="url"
+                  id="image"
+                  value={formData.image}
+                  onChange={e => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                  placeholder="Enter image URL"
+                />
+              </FormGroup>
+
+              <FormGroup>
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
                 <Input
                   type="text"
@@ -495,17 +518,6 @@ const ContentManagement = () => {
                   onChange={e => setFormData(prev => ({ ...prev, tags: e.target.value }))}
                   placeholder="e.g., technology, business, news"
                   required
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="image">Image URL</Label>
-                <Input
-                  type="text"
-                  id="image"
-                  value={formData.image}
-                  onChange={e => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                  placeholder="Enter image URL"
                 />
               </FormGroup>
 

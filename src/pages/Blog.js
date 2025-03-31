@@ -40,14 +40,37 @@ const BlogCard = styled(motion.div)`
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     transform: translateY(-5px);
   }
 `;
 
+const BlogImage = styled.div`
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
+  }
+`;
+
 const BlogContent = styled.div`
   padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 `;
 
 const BlogTitle = styled.h2`
@@ -221,6 +244,11 @@ const Blog = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
+            {post.image && (
+              <BlogImage>
+                <img src={post.image} alt={post.title} />
+              </BlogImage>
+            )}
             <BlogContent>
               <BlogTitle>
                 <Link to={`/blog/${post._id}`}>{post.title}</Link>
