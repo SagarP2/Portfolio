@@ -393,21 +393,17 @@ const arrowVariants = {
 };
 
 const ProjectCard = ({ project, index }) => {
-  // Safely destructure with default values and handle both tags and technologies
+  // Safely destructure with default values
   const { 
-    id = '', 
+    _id = '', 
     title = '', 
     description = '', 
     image = '', 
     technologies = [], 
-    tags = [],
-    github = '#', 
-    live = '', 
-    featured = false 
+    githubLink = '#', 
+    demoLink = '',
+    createdAt = new Date()
   } = project || {};
-  
-  // Use either technologies or tags array
-  const techStack = technologies.length > 0 ? technologies : tags;
   
   // For 3D hover effect
   const x = useMotionValue(0);
@@ -475,17 +471,6 @@ const ProjectCard = ({ project, index }) => {
           transformPerspective: 1000
         }}
       >
-        {featured && (
-          <FeaturedBadge
-            variants={featuredBadgeVariants}
-            initial="initial"
-            animate="animate"
-            custom={index}
-          >
-            Featured
-          </FeaturedBadge>
-        )}
-        
         <CardImageContainer>
           <CardImage 
             src={image} 
@@ -521,7 +506,7 @@ const ProjectCard = ({ project, index }) => {
             initial="initial"
             animate="animate"
           >
-            {techStack.map((tech, idx) => (
+            {technologies.map((tech, idx) => (
               <Tag 
                 key={idx}
                 variants={tagVariants}
@@ -538,7 +523,7 @@ const ProjectCard = ({ project, index }) => {
             animate="animate"
           >
             <ProjectLink 
-              href={github} 
+              href={githubLink} 
               target="_blank"
               rel="noopener noreferrer"
               variants={linkVariants}
@@ -549,9 +534,9 @@ const ProjectCard = ({ project, index }) => {
               <GithubIcon /> GitHub
             </ProjectLink>
             
-            {live && (
+            {demoLink && (
               <ProjectLink 
-                href={live} 
+                href={demoLink} 
                 target="_blank"
                 rel="noopener noreferrer"
                 variants={linkVariants}
@@ -564,7 +549,7 @@ const ProjectCard = ({ project, index }) => {
             )}
             
             <ViewDetailsLink 
-              to={`/projects/${id}`}
+              to={`/projects/${_id}`}
               variants={buttonVariants}
               whileHover="hover"
               whileTap="tap"

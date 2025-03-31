@@ -8,28 +8,41 @@ const projectSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
-  technologies: {
-    type: [String],
-    required: true
-  },
-  imageUrl: {
+  image: {
     type: String,
     required: true
   },
-  projectUrl: {
-    type: String
+  technologies: [{
+    type: String,
+    required: true
+  }],
+  githubLink: {
+    type: String,
+    required: true,
+    trim: true
   },
-  githubUrl: {
-    type: String
+  demoLink: {
+    type: String,
+    trim: true
   },
-  date: {
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
     type: Date,
     default: Date.now
   }
-}, {
-  timestamps: true
 });
 
-module.exports = mongoose.model('Project', projectSchema); 
+projectSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+const Project = mongoose.model('Project', projectSchema);
+
+module.exports = Project; 

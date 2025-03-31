@@ -7,6 +7,8 @@ import theme from './styles/theme';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './components/Toast';
 import SessionManager from './components/SessionManager';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Components
 import Navbar from './components/Navbar';
@@ -171,6 +173,18 @@ function App() {
           <Router>
             <AppContent />
           </Router>
+          <ToastContainer
+            position="bottom-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
