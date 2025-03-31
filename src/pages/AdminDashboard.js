@@ -110,12 +110,19 @@ const NavLink = styled(Link)`
   
   &:hover {
     background: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
   }
   
   svg {
     margin-right: 0.75rem;
     width: 18px;
     height: 18px;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover svg {
+    opacity: 1;
   }
 `;
 
@@ -169,7 +176,7 @@ const ContentCard = styled(motion.div)`
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 `;
 
-const BackToSiteButton = styled(motion.div)`
+const BackToSiteButton = styled.div`
   margin-top: 1rem;
 `;
 
@@ -310,13 +317,23 @@ const AdminDashboard = () => {
         <NavSection>
           <NavHeader>Content Management</NavHeader>
           <NavLink to="/admin/projects" active={location.pathname === '/admin/projects' ? 1 : 0}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
             Projects
           </NavLink>
           <NavLink to="/admin/services" active={location.pathname === '/admin/services' ? 1 : 0}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
             Services
           </NavLink>
           <NavLink to="/admin/content" active={location.pathname === '/admin/content' ? 1 : 0}>
-            Content
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Blog
           </NavLink>
         </NavSection>
 
@@ -325,11 +342,20 @@ const AdminDashboard = () => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
           Logout
         </LogoutButton>
 
         <BackToSiteButton>
           <BackToSiteLink to="/">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
             Back to Site
           </BackToSiteLink>
         </BackToSiteButton>

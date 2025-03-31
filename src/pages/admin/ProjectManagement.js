@@ -7,6 +7,8 @@ import { useAuth } from '../../context/AuthContext';
 
 const Container = styled.div`
   padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
 `;
 
 const Header = styled.div`
@@ -14,45 +16,81 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 
   h1 {
     color: ${props => props.theme.colors.text};
     font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    svg {
+      width: 24px;
+      height: 24px;
+      color: ${props => props.theme.colors.primary};
+    }
   }
 `;
 
-const AddButton = styled.button`
+const AddButton = styled(motion.button)`
   background: ${props => props.theme.colors.primary};
   color: white;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   transition: all 0.2s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 
   &:hover {
     background: ${props => props.theme.colors.primaryDark};
+    transform: translateY(-2px);
   }
 `;
 
 const ProjectGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2rem;
 `;
 
 const ProjectCard = styled(motion.div)`
-  background: ${props => props.theme.colors.cardBg};
-  border-radius: 0.5rem;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  }
 `;
 
 const ProjectImage = styled.img`
   width: 100%;
   height: 200px;
   object-fit: cover;
+  transition: transform 0.3s ease;
+
+  ${ProjectCard}:hover & {
+    transform: scale(1.05);
+  }
 `;
 
 const ProjectContent = styled.div`
@@ -61,14 +99,24 @@ const ProjectContent = styled.div`
 
 const ProjectTitle = styled.h3`
   color: ${props => props.theme.colors.text};
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    color: ${props => props.theme.colors.primary};
+  }
 `;
 
 const ProjectDescription = styled.p`
   color: ${props => props.theme.colors.textSecondary};
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   margin-bottom: 1rem;
+  line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -79,44 +127,61 @@ const TechnologiesContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 `;
 
 const Technology = styled.span`
-  background: ${props => props.theme.colors.primary}20;
+  background: ${props => props.theme.colors.primary}15;
   color: ${props => props.theme.colors.primary};
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
   font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 `;
 
 const ActionButtons = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-top: 1rem;
 `;
 
-const Button = styled.button`
+const Button = styled(motion.button)`
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   transition: all 0.2s ease;
 
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
   &.edit {
-    background: ${props => props.theme.colors.primary}20;
+    background: ${props => props.theme.colors.primary}15;
     color: ${props => props.theme.colors.primary};
   }
 
   &.delete {
-    background: ${props => props.theme.colors.error}20;
+    background: ${props => props.theme.colors.error}15;
     color: ${props => props.theme.colors.error};
   }
 
   &:hover {
-    opacity: 0.8;
+    transform: translateY(-2px);
   }
 `;
 
@@ -359,20 +424,33 @@ const ProjectManagement = () => {
   return (
     <Container>
       <Header>
-        <h1>Project Management</h1>
-        <AddButton onClick={() => {
-          setEditingProject(null);
-          setFormData({
-            title: '',
-            description: '',
-            technologies: '',
-            image: '',
-            projectUrl: '',
-            githubUrl: '',
-            date: new Date().toISOString().split('T')[0]
-          });
-          setShowModal(true);
-        }}>
+        <h1>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          Project Management
+        </h1>
+        <AddButton
+          onClick={() => {
+            setEditingProject(null);
+            setFormData({
+              title: '',
+              description: '',
+              technologies: '',
+              image: '',
+              projectUrl: '',
+              githubUrl: '',
+              date: new Date().toISOString().split('T')[0]
+            });
+            setShowModal(true);
+          }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
           Add New Project
         </AddButton>
       </Header>
@@ -387,18 +465,46 @@ const ProjectManagement = () => {
           >
             <ProjectImage src={getImageUrl(project.image)} alt={project.title} />
             <ProjectContent>
-              <ProjectTitle>{project.title}</ProjectTitle>
+              <ProjectTitle>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+                {project.title}
+              </ProjectTitle>
               <ProjectDescription>{project.description}</ProjectDescription>
               <TechnologiesContainer>
                 {project.technologies.map(tech => (
-                  <Technology key={tech}>{tech}</Technology>
+                  <Technology key={tech}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    {tech}
+                  </Technology>
                 ))}
               </TechnologiesContainer>
               <ActionButtons>
-                <Button className="edit" onClick={() => handleEdit(project)}>
+                <Button 
+                  className="edit" 
+                  onClick={() => handleEdit(project)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
                   Edit
                 </Button>
-                <Button className="delete" onClick={() => handleDelete(project._id)}>
+                <Button 
+                  className="delete" 
+                  onClick={() => handleDelete(project._id)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
                   Delete
                 </Button>
               </ActionButtons>

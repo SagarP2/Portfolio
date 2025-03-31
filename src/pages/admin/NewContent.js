@@ -178,7 +178,7 @@ const NewContent = () => {
   return (
     <Container>
       <Header>
-        <h1>Create New Content</h1>
+        <h1>Blog New Content</h1>
         <p>Fill in the details below to create a new content item.</p>
       </Header>
 
