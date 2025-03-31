@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const PageContainer = styled(motion.div)`
   min-height: 100vh;
@@ -42,68 +43,72 @@ const SubTitle = styled(motion.p)`
   color: var(--color-text-secondary);
 `;
 
+const ServicesContainer = styled.div`
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+
 const ServicesGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  margin-top: 3rem;
 `;
 
 const ServiceCard = styled(motion.div)`
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 0.75rem;
+  background: rgba(18, 18, 18, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
-  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  overflow: hidden;
-  
+  transition: transform 0.3s ease;
+
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
   }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%);
+  .icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${props => props.theme.colors.primary};
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    color: ${props => props.theme.colors.text};
+    margin: 0;
+  }
+
+  p {
+    color: ${props => props.theme.colors.textSecondary};
+    line-height: 1.6;
+    margin: 0;
   }
 `;
 
-const ServiceIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  margin-bottom: 1.5rem;
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--color-primary);
-  font-size: 1.5rem;
-`;
-
-const ServiceTitle = styled.h3`
-  font-size: 1.25rem;
+const PageTitle = styled.h1`
+  font-size: 2.5rem;
+  color: ${props => props.theme.colors.text};
   margin-bottom: 1rem;
-  color: var(--color-heading);
+  text-align: center;
 `;
 
-const ServiceDescription = styled.p`
-  color: var(--color-text-secondary);
+const PageDescription = styled.p`
+  color: ${props => props.theme.colors.textSecondary};
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 1.1rem;
   line-height: 1.6;
 `;
 
@@ -191,109 +196,48 @@ const shapeVariants = {
   }
 };
 
-const services = [
-  {
-    icon: '💻',
-    title: 'Web Development',
-    description: 'We build responsive, fast, and user-friendly websites using modern technologies and best practices.'
-  },
-  {
-    icon: '📱',
-    title: 'Mobile App Development',
-    description: 'Create cross-platform or native mobile applications that deliver exceptional user experiences.'
-  },
-  {
-    icon: '🎨',
-    title: 'UI/UX Design',
-    description: 'We craft intuitive interfaces and engaging user experiences that help your products stand out.'
-  },
-  {
-    icon: '🛒',
-    title: 'E-commerce Solutions',
-    description: 'Build online stores that convert visitors into customers with seamless shopping experiences.'
-  },
-  {
-    icon: '🔍',
-    title: 'SEO Optimization',
-    description: 'Improve your website visibility in search results to drive more organic traffic.'
-  },
-  {
-    icon: '📊',
-    title: 'Digital Marketing',
-    description: 'Develop comprehensive digital marketing strategies to grow your online presence and reach.'
-  }
-];
+const Services = () => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-const ServicesPage = () => {
-  // Smooth scroll behavior
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'auto'
-    });
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get('/api/services');
+        setServices(response.data);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
   }, []);
 
   return (
-    <PageContainer
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={containerVariants}
-    >
-      <Container>
-        <Header>
-          <Title variants={itemVariants}>Our Services</Title>
-          <SubTitle variants={itemVariants}>
-            We offer comprehensive digital solutions to help your business grow and succeed in today's competitive landscape.
-          </SubTitle>
-        </Header>
-        
-        <ServicesGrid>
-          {services.map((service, index) => (
-            <ServiceCard key={index} variants={itemVariants}>
-              <ServiceIcon>{service.icon}</ServiceIcon>
-              <ServiceTitle>{service.title}</ServiceTitle>
-              <ServiceDescription>{service.description}</ServiceDescription>
-            </ServiceCard>
-          ))}
-        </ServicesGrid>
-        
-        <CTASection variants={itemVariants}>
-          <CTATitle>Ready to Start Your Project?</CTATitle>
-          <CTADescription>
-            Let's discuss how our services can help you achieve your business goals. Contact us today for a free consultation.
-          </CTADescription>
-          <Button href="/contact">
-            Get in Touch
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </Button>
-        </CTASection>
-      </Container>
-      
-      <BackgroundShape 
-        variants={shapeVariants}
-        style={{ 
-          width: '500px', 
-          height: '500px', 
-          top: '10%', 
-          right: '-10%' 
-        }}
-      />
-      
-      <BackgroundShape 
-        variants={shapeVariants}
-        style={{ 
-          width: '400px', 
-          height: '400px', 
-          bottom: '10%', 
-          left: '-5%' 
-        }}
-      />
-    </PageContainer>
+    <ServicesContainer>
+      <PageTitle>Our Services</PageTitle>
+      <PageDescription>
+        We offer a comprehensive range of digital solutions to help your business thrive in the modern world.
+      </PageDescription>
+
+      <ServicesGrid>
+        {services.map((service, index) => (
+          <ServiceCard
+            key={service._id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <div className="icon" dangerouslySetInnerHTML={{ __html: service.icon }} />
+            <h3>{service.title}</h3>
+            <p>{service.description}</p>
+          </ServiceCard>
+        ))}
+      </ServicesGrid>
+    </ServicesContainer>
   );
 };
 
-export default ServicesPage; 
+export default Services; 

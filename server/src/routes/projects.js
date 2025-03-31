@@ -1,43 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const Project = require('../models/Project');
+const Project = require('../models/project');
 const { auth, isAdmin } = require('../middleware/auth');
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/projects');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5000000 }, // 5MB limit
-  fileFilter: function (req, file, cb) {
-    const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-    if (extname && mimetype) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'));
-    }
-  }
-});
-
+// Public routes
 // Get all projects
 router.get('/', async (req, res) => {
   try {
-    const projects = await Project.find().sort({ date: -1 });
+    const projects = await Project.find().sort({ createdAt: -1 });
     res.json(projects);
   } catch (error) {
-    console.error('Error fetching projects:', error);
-    res.status(500).json({ message: 'Error fetching projects' });
+    res.status(500).json({ message: 'Error fetching projects', error: error.message });
   }
 });
 
@@ -55,68 +28,122 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create project (protected)
-router.post('/', auth, async (req, res) => {
+// Protected routes (require authentication)
+// Create a new project
+router.post('/', auth, isAdmin, async (req, res) => {
   try {
-    const { title, description, technologies, imageUrl, projectUrl, githubUrl, date } = req.body;
+    const { title, description, image, technologies, githubLink, demoLink } = req.body;
     
+    // Detailed validation
+    const missingFields = [];
+    if (!title) missingFields.push('title');
+    if (!description) missingFields.push('description');
+    if (!technologies) missingFields.push('technologies');
+    if (!githubLink) missingFields.push('githubLink');
+    if (!image) missingFields.push('image');
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        message: 'Required fields are missing', 
+        missingFields,
+        receivedData: req.body 
+      });
+    }
+
+    // Validate image URL
+    try {
+      new URL(image);
+    } catch (error) {
+      return res.status(400).json({ 
+        message: 'Invalid image URL',
+        details: 'Please provide a valid image URL'
+      });
+    }
+
+    // Parse technologies
+    const techArray = Array.isArray(technologies) 
+      ? technologies 
+      : technologies.split(',').map(tech => tech.trim()).filter(tech => tech);
+
+    // Create and save the project
     const project = new Project({
       title,
       description,
-      technologies,
-      imageUrl,
-      projectUrl,
-      githubUrl,
-      date: date || new Date()
+      image,
+      technologies: techArray,
+      githubLink,
+      demoLink
     });
 
     await project.save();
     res.status(201).json(project);
   } catch (error) {
     console.error('Error creating project:', error);
-    res.status(500).json({ message: 'Error creating project' });
+    res.status(500).json({ 
+      message: 'Error creating project', 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error : undefined
+    });
   }
 });
 
-// Update project (protected)
-router.put('/:id', auth, async (req, res) => {
+// Update a project
+router.put('/:id', auth, isAdmin, async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const { title, description, image, technologies, githubLink, demoLink } = req.body;
+    
+    // Validate image URL if provided
+    if (image) {
+      try {
+        new URL(image);
+      } catch (error) {
+        return res.status(400).json({ 
+          message: 'Invalid image URL',
+          details: 'Please provide a valid image URL'
+        });
+      }
+    }
+
+    // Parse technologies
+    const techArray = Array.isArray(technologies) 
+      ? technologies 
+      : technologies.split(',').map(tech => tech.trim()).filter(tech => tech);
+
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
+      { 
+        title, 
+        description, 
+        image, 
+        technologies: techArray, 
+        githubLink, 
+        demoLink 
+      },
+      { new: true }
+    );
+    
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
-
-    const { title, description, technologies, imageUrl, projectUrl, githubUrl, date } = req.body;
     
-    project.title = title || project.title;
-    project.description = description || project.description;
-    project.technologies = technologies || project.technologies;
-    project.imageUrl = imageUrl || project.imageUrl;
-    project.projectUrl = projectUrl || project.projectUrl;
-    project.githubUrl = githubUrl || project.githubUrl;
-    project.date = date || project.date;
-
-    await project.save();
     res.json(project);
   } catch (error) {
-    console.error('Error updating project:', error);
-    res.status(500).json({ message: 'Error updating project' });
+    res.status(500).json({ message: 'Error updating project', error: error.message });
   }
 });
 
-// Delete project (protected)
-router.delete('/:id', auth, async (req, res) => {
+// Delete a project
+router.delete('/:id', auth, isAdmin, async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findByIdAndDelete(req.params.id);
+    
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    await project.deleteOne();
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
-    console.error('Error deleting project:', error);
-    res.status(500).json({ message: 'Error deleting project' });
+    res.status(500).json({ message: 'Error deleting project', error: error.message });
   }
 });
 

@@ -1,114 +1,243 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Container = styled.div`
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 `;
 
-const Header = styled.div`
+const ServiceForm = styled.form`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 12px;
   margin-bottom: 2rem;
+`;
+
+const Input = styled.input`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  color: ${props => props.theme.colors.text};
+  font-size: 1rem;
+  width: 100%;
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.primary};
+  }
+`;
+
+const TextArea = styled.textarea`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  color: ${props => props.theme.colors.text};
+  font-size: 1rem;
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.primary};
+  }
 `;
 
 const Button = styled(motion.button)`
   background: ${props => props.theme.colors.primary};
   color: white;
-  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
   font-weight: 500;
-
-  &:hover {
-    background: ${props => props.theme.colors.primaryDark};
+  cursor: pointer;
+  width: fit-content;
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 `;
 
-const ServiceGrid = styled.div`
+const ServiceList = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 `;
 
-const ServiceCard = styled.div`
-  background: ${props => props.theme.colors.cardBg};
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const ServiceIcon = styled.div`
-  width: 100%;
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${props => props.theme.colors.primary}10;
-  color: ${props => props.theme.colors.primary};
-  font-size: 3rem;
-`;
-
-const ServiceContent = styled.div`
+const ServiceCard = styled(motion.div)`
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
   padding: 1.5rem;
-`;
-
-const ServiceTitle = styled.h3`
-  margin-bottom: 0.5rem;
-  color: ${props => props.theme.colors.text};
-`;
-
-const ServiceDescription = styled.p`
-  color: ${props => props.theme.colors.textSecondary};
-  margin-bottom: 1rem;
-  line-height: 1.6;
-`;
-
-const ActionButtons = styled.div`
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-`;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
 
-const EditButton = styled(Button)`
-  background: ${props => props.theme.colors.secondary};
-  flex: 1;
-
-  &:hover {
-    background: ${props => props.theme.colors.secondaryDark};
+  .icon {
+    font-size: 2rem;
+    color: ${props => props.theme.colors.primary};
   }
-`;
 
-const DeleteButton = styled(Button)`
-  background: ${props => props.theme.colors.error};
-  flex: 1;
+  .title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+  }
 
-  &:hover {
-    background: ${props => props.theme.colors.errorDark};
+  .description {
+    color: ${props => props.theme.colors.textSecondary};
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: auto;
   }
 `;
 
 const ServiceManagement = () => {
-  // TODO: Implement service management functionality
+  const [services, setServices] = useState([]);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    icon: ''
+  });
+  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await axios.get('/api/services');
+      setServices(response.data);
+    } catch (error) {
+      toast.error('Error fetching services');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (editingId) {
+        await axios.put(`/api/services/${editingId}`, formData);
+        toast.success('Service updated successfully');
+      } else {
+        await axios.post('/api/services', formData);
+        toast.success('Service created successfully');
+      }
+
+      setFormData({ title: '', description: '', icon: '' });
+      setEditingId(null);
+      fetchServices();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error saving service');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (service) => {
+    setFormData({
+      title: service.title,
+      description: service.description,
+      icon: service.icon
+    });
+    setEditingId(service._id);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this service?')) return;
+
+    try {
+      await axios.delete(`/api/services/${id}`);
+      toast.success('Service deleted successfully');
+      fetchServices();
+    } catch (error) {
+      toast.error('Error deleting service');
+    }
+  };
+
   return (
     <Container>
-      <Header>
-        <h2>Service Management</h2>
+      <ServiceForm onSubmit={handleSubmit}>
+        <Input
+          type="text"
+          placeholder="Service Title"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          required
+        />
+        <TextArea
+          placeholder="Service Description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          required
+        />
+        <Input
+          type="text"
+          placeholder="Icon (SVG path or class name)"
+          value={formData.icon}
+          onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+          required
+        />
         <Button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          type="submit"
+          disabled={loading}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          Add New Service
+          {editingId ? 'Update Service' : 'Add Service'}
         </Button>
-      </Header>
+      </ServiceForm>
 
-      <ServiceGrid>
-        {/* Service cards will be rendered here */}
-      </ServiceGrid>
+      <ServiceList>
+        {services.map((service) => (
+          <ServiceCard
+            key={service._id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="icon" dangerouslySetInnerHTML={{ __html: service.icon }} />
+            <h3 className="title">{service.title}</h3>
+            <p className="description">{service.description}</p>
+            <div className="actions">
+              <Button
+                onClick={() => handleEdit(service)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Edit
+              </Button>
+              <Button
+                onClick={() => handleDelete(service._id)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{ background: '#dc2626' }}
+              >
+                Delete
+              </Button>
+            </div>
+          </ServiceCard>
+        ))}
+      </ServiceList>
     </Container>
   );
 };

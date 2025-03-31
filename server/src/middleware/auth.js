@@ -3,45 +3,27 @@ const User = require('../models/User');
 
 const auth = async (req, res, next) => {
   try {
-    // Check if Authorization header exists
-    const authHeader = req.header('Authorization');
-    if (!authHeader) {
-      return res.status(401).json({ message: 'No authentication token provided' });
-    }
-
-    // Check if token format is correct
-    if (!authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Invalid token format' });
-    }
-
-    const token = authHeader.replace('Bearer ', '');
+    const token = req.header('Authorization')?.replace('Bearer ', '');
     
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      // Check if user exists
-      const user = await User.findById(decoded.id);
-      if (!user) {
-        return res.status(401).json({ message: 'User not found' });
-      }
-
-      // Add user to request object
-      req.user = user;
-      req.token = token;
-      next();
-    } catch (error) {
-      console.error('Token verification error:', error);
-      if (error.name === 'TokenExpiredError') {
-        return res.status(401).json({ message: 'Token has expired' });
-      }
-      if (error.name === 'JsonWebTokenError') {
-        return res.status(401).json({ message: 'Invalid token' });
-      }
-      throw error;
+    if (!token) {
+      return res.status(401).json({ message: 'No authentication token, access denied' });
     }
+
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    
+    if (!verified) {
+      return res.status(401).json({ message: 'Token verification failed, authorization denied' });
+    }
+
+    const user = await User.findById(verified.id);
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    req.user = user;
+    next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    res.status(401).json({ message: 'Authentication failed' });
+    res.status(401).json({ message: 'Token is not valid' });
   }
 };
 

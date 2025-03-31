@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import { useToast } from '../../components/Toast';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
 
 const Container = styled.div`
   padding: 2rem;
@@ -199,7 +200,18 @@ const SubmitButton = styled.button`
   }
 `;
 
+// Add a utility function to handle image URLs
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  // If it's a relative path, prepend the server URL
+  return `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/${imagePath}`;
+};
+
 const ProjectManagement = () => {
+  const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -208,7 +220,7 @@ const ProjectManagement = () => {
     title: '',
     description: '',
     technologies: '',
-    imageUrl: '',
+    image: '',
     projectUrl: '',
     githubUrl: '',
     date: new Date().toISOString().split('T')[0]
@@ -216,21 +228,30 @@ const ProjectManagement = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useToast();
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
   const fetchProjects = async () => {
     try {
-      const response = await axios.get('/api/projects');
+      setLoading(true);
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        }
+      };
+      const response = await axios.get('/api/projects', config);
       setProjects(response.data);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching projects:', error);
-      addToast('Error fetching projects', 'error');
+      const errorMessage = error.response?.data?.message || 
+                         error.response?.data?.error || 
+                         'Error fetching projects';
+      addToast(errorMessage, 'error');
+    } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -238,15 +259,29 @@ const ProjectManagement = () => {
 
     try {
       const projectData = {
-        ...formData,
-        technologies: formData.technologies.split(',').map(tech => tech.trim()).filter(tech => tech)
+        title: formData.title,
+        description: formData.description,
+        image: formData.image,
+        technologies: formData.technologies,
+        githubLink: formData.githubUrl,
+        demoLink: formData.projectUrl
+      };
+
+      // Add auth token to request headers
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          'Content-Type': 'application/json'
+        }
       };
 
       if (editingProject) {
-        await axios.put(`/api/projects/${editingProject._id}`, projectData);
+        const response = await axios.put(`/api/projects/${editingProject._id}`, projectData, config);
+        console.log('Update response:', response);
         addToast('Project updated successfully', 'success');
       } else {
-        await axios.post('/api/projects', projectData);
+        const response = await axios.post('/api/projects', projectData, config);
+        console.log('Create response:', response);
         addToast('Project created successfully', 'success');
       }
 
@@ -256,7 +291,7 @@ const ProjectManagement = () => {
         title: '',
         description: '',
         technologies: '',
-        imageUrl: '',
+        image: '',
         projectUrl: '',
         githubUrl: '',
         date: new Date().toISOString().split('T')[0]
@@ -264,7 +299,11 @@ const ProjectManagement = () => {
       fetchProjects();
     } catch (error) {
       console.error('Error saving project:', error);
-      addToast('Error saving project', 'error');
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Error saving project';
+      addToast(errorMessage, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -276,10 +315,10 @@ const ProjectManagement = () => {
       title: project.title,
       description: project.description,
       technologies: project.technologies.join(', '),
-      imageUrl: project.imageUrl,
-      projectUrl: project.projectUrl || '',
-      githubUrl: project.githubUrl || '',
-      date: new Date(project.date).toISOString().split('T')[0]
+      image: project.image,
+      projectUrl: project.demoLink || '',
+      githubUrl: project.githubLink || '',
+      date: project.createdAt ? new Date(project.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setShowModal(true);
   };
@@ -287,12 +326,20 @@ const ProjectManagement = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       try {
-        await axios.delete(`/api/projects/${id}`);
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          }
+        };
+        await axios.delete(`/api/projects/${id}`, config);
         addToast('Project deleted successfully', 'success');
         fetchProjects();
       } catch (error) {
         console.error('Error deleting project:', error);
-        addToast('Error deleting project', 'error');
+        const errorMessage = error.response?.data?.message || 
+                           error.response?.data?.error || 
+                           'Error deleting project';
+        addToast(errorMessage, 'error');
       }
     }
   };
@@ -319,7 +366,7 @@ const ProjectManagement = () => {
             title: '',
             description: '',
             technologies: '',
-            imageUrl: '',
+            image: '',
             projectUrl: '',
             githubUrl: '',
             date: new Date().toISOString().split('T')[0]
@@ -338,7 +385,7 @@ const ProjectManagement = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <ProjectImage src={project.imageUrl} alt={project.title} />
+            <ProjectImage src={getImageUrl(project.image)} alt={project.title} />
             <ProjectContent>
               <ProjectTitle>{project.title}</ProjectTitle>
               <ProjectDescription>{project.description}</ProjectDescription>
@@ -408,11 +455,25 @@ const ProjectManagement = () => {
                 <Label>Image URL</Label>
                 <Input
                   type="url"
-                  name="imageUrl"
-                  value={formData.imageUrl}
+                  name="image"
+                  value={formData.image}
                   onChange={handleChange}
+                  placeholder="Enter image URL"
                   required
                 />
+                {formData.image && (
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <img 
+                      src={formData.image}
+                      alt="Preview" 
+                      style={{ maxWidth: '200px', marginBottom: '0.5rem' }} 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/200x150?text=Invalid+Image+URL';
+                      }}
+                    />
+                  </div>
+                )}
               </FormGroup>
               <FormGroup>
                 <Label>Project URL</Label>

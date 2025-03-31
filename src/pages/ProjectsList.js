@@ -1,154 +1,231 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import ProjectCard from '../components/ProjectCard';
-
-const PageContainer = styled(motion.div)`
-  min-height: 100vh;
-  position: relative;
-  padding: 8rem 0 4rem;
-  overflow-x: hidden;
-`;
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 2rem;
 `;
 
-const PageHeader = styled.div`
+const Header = styled.div`
   text-align: center;
-  margin-bottom: 4rem;
-`;
+  margin-bottom: 3rem;
 
-const Title = styled(motion.h1)`
-  font-size: 3rem;
-  margin-bottom: 1.5rem;
-  color: var(--color-heading);
-`;
+  h1 {
+    color: ${props => props.theme.colors.text};
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
 
-const Description = styled(motion.p)`
-  max-width: 700px;
-  margin: 0 auto;
-  color: var(--color-text-secondary);
-  font-size: 1.1rem;
-  line-height: 1.6;
+  p {
+    color: ${props => props.theme.colors.textSecondary};
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
 `;
 
 const ProjectsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  padding: 1rem;
+`;
+
+const ProjectCard = styled(motion.div)`
+  background: #1a1a1a;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const ProjectImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+`;
+
+const ProjectContent = styled.div`
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+`;
+
+const ProjectTitle = styled.h2`
+  color: #ffffff;
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+`;
+
+const ProjectDescription = styled.p`
+  color: #a1a1aa;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  font-size: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const TechnologiesContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: auto 0 1.5rem 0;
+`;
+
+const Technology = styled.span`
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+`;
+
+const ProjectLinks = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+`;
+
+const ViewDetailsButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #2563eb;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
   }
 `;
 
-// Animation variants
-const containerVariants = {
-  initial: { opacity: 0 },
-  animate: { 
-    opacity: 1,
-    transition: { duration: 0.5, staggerChildren: 0.1 }
-  },
-  exit: { opacity: 0, transition: { duration: 0.3 } }
-};
+const GitHubLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
 
-const itemVariants = {
-  initial: { y: 20, opacity: 0 },
-  animate: { 
-    y: 0, 
-    opacity: 1,
-    transition: { duration: 0.5 }
+  svg {
+    width: 24px;
+    height: 24px;
   }
-};
 
-// Sample projects data
-const projects = [
-  {
-    id: 1,
-    title: "E-commerce Platform",
-    category: "Web Development",
-    description: "A full-featured e-commerce platform with secure payment processing and inventory management.",
-    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    tags: ["React", "Node.js", "MongoDB", "Stripe"]
-  },
-  {
-    id: 2,
-    title: "Fitness Tracking App",
-    category: "Mobile Development",
-    description: "A cross-platform mobile app for tracking workouts, nutrition, and health metrics.",
-    image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    tags: ["React Native", "Firebase", "Health API"]
-  },
-  {
-    id: 3,
-    title: "Real Estate Portal",
-    category: "Web Development",
-    description: "A property listing platform with advanced search features and virtual tours.",
-    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    tags: ["Vue.js", "Express", "PostgreSQL"]
-  },
-  {
-    id: 4,
-    title: "Financial Dashboard",
-    category: "Data Visualization",
-    description: "An interactive dashboard for tracking investments and financial metrics with real-time data.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    tags: ["D3.js", "React", "Node.js", "API Integration"]
-  },
-  {
-    id: 5,
-    title: "Educational Platform",
-    category: "Web Development",
-    description: "An online learning platform with course management, video lessons, and student progress tracking.",
-    image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    tags: ["React", "Firebase", "WebRTC"]
-  },
-  {
-    id: 6,
-    title: "Restaurant Management System",
-    category: "Business Software",
-    description: "A comprehensive system for managing orders, inventory, and customer relationships for restaurants.",
-    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    tags: ["Angular", "Node.js", "MongoDB"]
+  &:hover {
+    color: #3b82f6;
   }
-];
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+`;
 
 const ProjectsList = () => {
-  // Scroll to top on mount
-  React.useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'auto'
-    });
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchProjects();
   }, []);
 
-  return (
-    <PageContainer
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={containerVariants}
-    >
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get('/api/projects');
+      setProjects(response.data);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      setError('Failed to fetch projects');
+      setProjects([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <LoadingContainer>
+        <div className="loading-spinner">Loading...</div>
+      </LoadingContainer>
+    );
+  }
+
+  if (error) {
+    return (
       <Container>
-        <PageHeader>
-          <Title variants={itemVariants}>Our Projects</Title>
-          <Description variants={itemVariants}>
-            Explore our portfolio of innovative digital solutions that have helped businesses transform and grow.
-          </Description>
-        </PageHeader>
-        
-        <ProjectsGrid>
-          {projects.map((project) => (
-            <motion.div key={project.id} variants={itemVariants}>
-              <ProjectCard project={project} />
-            </motion.div>
-          ))}
-        </ProjectsGrid>
+        <div className="error-message">{error}</div>
       </Container>
-    </PageContainer>
+    );
+  }
+
+  return (
+    <Container>
+      <Header>
+        <h1>Our Projects</h1>
+        <p>Explore our portfolio of innovative and impactful projects</p>
+      </Header>
+
+      <ProjectsGrid>
+        {projects.map((project, index) => (
+          <ProjectCard
+            key={project._id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <ProjectImage src={project.image} alt={project.title} />
+            <ProjectContent>
+              <ProjectTitle>{project.title}</ProjectTitle>
+              <ProjectDescription>{project.description}</ProjectDescription>
+              <TechnologiesContainer>
+                {project.technologies.map((tech, techIndex) => (
+                  <Technology key={techIndex}>{tech}</Technology>
+                ))}
+              </TechnologiesContainer>
+              <ProjectLinks>
+                <GitHubLink href={project.githubLink} target="_blank" rel="noopener noreferrer">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                </GitHubLink>
+                <ViewDetailsButton to={`/projects/${project._id}`}>
+                  View Details
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </ViewDetailsButton>
+              </ProjectLinks>
+            </ProjectContent>
+          </ProjectCard>
+        ))}
+      </ProjectsGrid>
+    </Container>
   );
 };
 
