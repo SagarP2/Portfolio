@@ -6,24 +6,53 @@ const projectSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  description: {
+  subtitle: {
+    type: String,
+    trim: true
+  },
+  mainimage: {
+    type: String,
+    required: true
+  },
+  secondaryimage: {
+    type: String
+  },
+  publishedYear: {
+    type: Number
+  },
+  shortDescription: {
+    type: String,
+    trim: true
+  },
+  officialWebsiteLink: {
+    type: String,
+    trim: true
+  },
+  gitHubLink: {
     type: String,
     required: true,
     trim: true
   },
-  image: {
+  services: [{
     type: String,
-    required: true
+    trim: true
+  }],
+  industries: [{
+    type: String,
+    trim: true
+  }],
+  technicalDescription: {
+    type: String,
+    trim: true
+  },
+  learningDescription: {
+    type: String,
+    trim: true
   },
   technologies: [{
     type: String,
-    required: true
-  }],
-  githubLink: {
-    type: String,
-    required: true,
     trim: true
-  },
+  }],
   demoLink: {
     type: String,
     trim: true

@@ -112,6 +112,12 @@ const ProjectTitle = styled.h3`
   }
 `;
 
+const ProjectSubtitle = styled.h4`
+  color: ${props => props.theme.colors.textSecondary};
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+`;
+
 const ProjectDescription = styled.p`
   color: ${props => props.theme.colors.textSecondary};
   font-size: 0.95rem;
@@ -121,6 +127,29 @@ const ProjectDescription = styled.p`
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+`;
+
+const ProjectMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+`;
+
+const MetaItem = styled.span`
+  background: ${props => props.theme.colors.primary}15;
+  color: ${props => props.theme.colors.primary};
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 `;
 
 const TechnologiesContainer = styled.div`
@@ -267,12 +296,15 @@ const SubmitButton = styled.button`
 
 // Add a utility function to handle image URLs
 const getImageUrl = (imagePath) => {
-  if (!imagePath) return '';
+  if (!imagePath) return 'https://via.placeholder.com/400x300?text=No+Image';
+  
+  // If it's already a full URL, return it
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
     return imagePath;
   }
-  // If it's a relative path, prepend the server URL
-  return `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/${imagePath}`;
+  
+  // Otherwise, assume it's a relative path and prepend the API URL
+  return `${process.env.REACT_APP_API_URL || ''}${imagePath}`;
 };
 
 const ProjectManagement = () => {
@@ -283,11 +315,19 @@ const ProjectManagement = () => {
   const [editingProject, setEditingProject] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
+    subtitle: '',
+    mainimage: '',
+    secondaryimage: '',
+    publishedYear: new Date().getFullYear(),
+    shortDescription: '',
+    officialWebsiteLink: '',
+    gitHubLink: '',
+    services: '',
+    industries: '',
+    technicalDescription: '',
+    learningDescription: '',
     technologies: '',
-    image: '',
-    projectUrl: '',
-    githubUrl: '',
+    demoLink: '',
     date: new Date().toISOString().split('T')[0]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -325,11 +365,19 @@ const ProjectManagement = () => {
     try {
       const projectData = {
         title: formData.title,
-        description: formData.description,
-        image: formData.image,
+        subtitle: formData.subtitle,
+        mainimage: formData.mainimage,
+        secondaryimage: formData.secondaryimage,
+        publishedYear: parseInt(formData.publishedYear),
+        shortDescription: formData.shortDescription,
+        officialWebsiteLink: formData.officialWebsiteLink,
+        gitHubLink: formData.gitHubLink,
+        services: formData.services,
+        industries: formData.industries,
+        technicalDescription: formData.technicalDescription,
+        learningDescription: formData.learningDescription,
         technologies: formData.technologies,
-        githubLink: formData.githubUrl,
-        demoLink: formData.projectUrl
+        demoLink: formData.demoLink
       };
 
       // Add auth token to request headers
@@ -354,11 +402,19 @@ const ProjectManagement = () => {
       setEditingProject(null);
       setFormData({
         title: '',
-        description: '',
+        subtitle: '',
+        mainimage: '',
+        secondaryimage: '',
+        publishedYear: new Date().getFullYear(),
+        shortDescription: '',
+        officialWebsiteLink: '',
+        gitHubLink: '',
+        services: '',
+        industries: '',
+        technicalDescription: '',
+        learningDescription: '',
         technologies: '',
-        image: '',
-        projectUrl: '',
-        githubUrl: '',
+        demoLink: '',
         date: new Date().toISOString().split('T')[0]
       });
       fetchProjects();
@@ -377,12 +433,20 @@ const ProjectManagement = () => {
   const handleEdit = (project) => {
     setEditingProject(project);
     setFormData({
-      title: project.title,
-      description: project.description,
-      technologies: project.technologies.join(', '),
-      image: project.image,
-      projectUrl: project.demoLink || '',
-      githubUrl: project.githubLink || '',
+      title: project.title || '',
+      subtitle: project.subtitle || '',
+      mainimage: project.mainimage || '',
+      secondaryimage: project.secondaryimage || '',
+      publishedYear: project.publishedYear || new Date().getFullYear(),
+      shortDescription: project.shortDescription || '',
+      officialWebsiteLink: project.officialWebsiteLink || '',
+      gitHubLink: project.gitHubLink || '',
+      services: Array.isArray(project.services) ? project.services.join(', ') : '',
+      industries: Array.isArray(project.industries) ? project.industries.join(', ') : '',
+      technicalDescription: project.technicalDescription || '',
+      learningDescription: project.learningDescription || '',
+      technologies: Array.isArray(project.technologies) ? project.technologies.join(', ') : '',
+      demoLink: project.demoLink || '',
       date: project.createdAt ? new Date(project.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setShowModal(true);
@@ -435,11 +499,19 @@ const ProjectManagement = () => {
             setEditingProject(null);
             setFormData({
               title: '',
-              description: '',
+              subtitle: '',
+              mainimage: '',
+              secondaryimage: '',
+              publishedYear: new Date().getFullYear(),
+              shortDescription: '',
+              officialWebsiteLink: '',
+              gitHubLink: '',
+              services: '',
+              industries: '',
+              technicalDescription: '',
+              learningDescription: '',
               technologies: '',
-              image: '',
-              projectUrl: '',
-              githubUrl: '',
+              demoLink: '',
               date: new Date().toISOString().split('T')[0]
             });
             setShowModal(true);
@@ -463,7 +535,7 @@ const ProjectManagement = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <ProjectImage src={getImageUrl(project.image)} alt={project.title} />
+            <ProjectImage src={getImageUrl(project.mainimage)} alt={project.title} />
             <ProjectContent>
               <ProjectTitle>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -471,7 +543,38 @@ const ProjectManagement = () => {
                 </svg>
                 {project.title}
               </ProjectTitle>
-              <ProjectDescription>{project.description}</ProjectDescription>
+              {project.subtitle && (
+                <ProjectSubtitle>{project.subtitle}</ProjectSubtitle>
+              )}
+              <ProjectDescription>{project.shortDescription || project.description}</ProjectDescription>
+              <ProjectMeta>
+                {project.publishedYear && (
+                  <MetaItem>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    {project.publishedYear}
+                  </MetaItem>
+                )}
+                {project.gitHubLink && (
+                  <MetaItem>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                    </svg>
+                    GitHub
+                  </MetaItem>
+                )}
+                {project.officialWebsiteLink && (
+                  <MetaItem>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    Website
+                  </MetaItem>
+                )}
+              </ProjectMeta>
               <TechnologiesContainer>
                 {project.technologies.map(tech => (
                   <Technology key={tech}>
@@ -484,10 +587,10 @@ const ProjectManagement = () => {
               </TechnologiesContainer>
               <ActionButtons>
                 <Button 
-                  className="edit" 
+                  className="edit"
                   onClick={() => handleEdit(project)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -496,10 +599,10 @@ const ProjectManagement = () => {
                   Edit
                 </Button>
                 <Button 
-                  className="delete" 
+                  className="delete"
                   onClick={() => handleDelete(project._id)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="3 6 5 6 21 6"/>
@@ -539,12 +642,117 @@ const ProjectManagement = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <Label>Description</Label>
-                <TextArea
-                  name="description"
-                  value={formData.description}
+                <Label>Subtitle</Label>
+                <Input
+                  type="text"
+                  name="subtitle"
+                  value={formData.subtitle}
                   onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Main Image URL</Label>
+                <Input
+                  type="url"
+                  name="mainimage"
+                  value={formData.mainimage}
+                  onChange={handleChange}
+                  placeholder="Enter main image URL"
                   required
+                />
+                {formData.mainimage && (
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <img 
+                      src={formData.mainimage}
+                      alt="Preview" 
+                      style={{ maxWidth: '200px', marginBottom: '0.5rem' }} 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/200x150?text=Invalid+Image+URL';
+                      }}
+                    />
+                  </div>
+                )}
+              </FormGroup>
+              <FormGroup>
+                <Label>Secondary Image URL</Label>
+                <Input
+                  type="url"
+                  name="secondaryimage"
+                  value={formData.secondaryimage}
+                  onChange={handleChange}
+                  placeholder="Enter secondary image URL"
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Published Year</Label>
+                <Input
+                  type="number"
+                  name="publishedYear"
+                  value={formData.publishedYear}
+                  onChange={handleChange}
+                  min={1900}
+                  max={new Date().getFullYear()}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Overview</Label>
+                <TextArea
+                  name="shortDescription"
+                  value={formData.shortDescription}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Official Website Link</Label>
+                <Input
+                  type="url"
+                  name="officialWebsiteLink"
+                  value={formData.officialWebsiteLink}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>GitHub Link</Label>
+                <Input
+                  type="url"
+                  name="gitHubLink"
+                  value={formData.gitHubLink}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Services</Label>
+                <Input
+                  type="text"
+                  name="services"
+                  value={formData.services}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Industries</Label>
+                <Input
+                  type="text"
+                  name="industries"
+                  value={formData.industries}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Technical Description</Label>
+                <TextArea
+                  name="technicalDescription"
+                  value={formData.technicalDescription}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Learning Description</Label>
+                <TextArea
+                  name="learningDescription"
+                  value={formData.learningDescription}
+                  onChange={handleChange}
                 />
               </FormGroup>
               <FormGroup>
@@ -558,44 +766,11 @@ const ProjectManagement = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <Label>Image URL</Label>
+                <Label>Demo Link</Label>
                 <Input
                   type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleChange}
-                  placeholder="Enter image URL"
-                  required
-                />
-                {formData.image && (
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <img 
-                      src={formData.image}
-                      alt="Preview" 
-                      style={{ maxWidth: '200px', marginBottom: '0.5rem' }} 
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/200x150?text=Invalid+Image+URL';
-                      }}
-                    />
-                  </div>
-                )}
-              </FormGroup>
-              <FormGroup>
-                <Label>Project URL</Label>
-                <Input
-                  type="url"
-                  name="projectUrl"
-                  value={formData.projectUrl}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>GitHub URL</Label>
-                <Input
-                  type="url"
-                  name="githubUrl"
-                  value={formData.githubUrl}
+                  name="demoLink"
+                  value={formData.demoLink}
                   onChange={handleChange}
                 />
               </FormGroup>

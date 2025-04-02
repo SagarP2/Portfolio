@@ -251,19 +251,7 @@ const About = () => {
             </StatItem>
           </Stats>
           
-          <SkillsContainer>
-            <SkillsTitle>Our Expertise</SkillsTitle>
-            <SkillTags>
-              <SkillTag whileHover={{ scale: 1.05 }}>React.js</SkillTag>
-              <SkillTag whileHover={{ scale: 1.05 }}>Node.js</SkillTag>
-              <SkillTag whileHover={{ scale: 1.05 }}>MongoDB</SkillTag>
-              <SkillTag whileHover={{ scale: 1.05 }}>Express</SkillTag>
-              <SkillTag whileHover={{ scale: 1.05 }}>Next.js</SkillTag>
-              <SkillTag whileHover={{ scale: 1.05 }}>Redux</SkillTag>
-              <SkillTag whileHover={{ scale: 1.05 }}>REST APIs</SkillTag>
-              <SkillTag whileHover={{ scale: 1.05 }}>UI/UX Design</SkillTag>
-            </SkillTags>
-          </SkillsContainer>
+         
         </ContentWrapper>
         
         <ImageWrapper
