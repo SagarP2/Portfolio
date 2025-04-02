@@ -334,10 +334,18 @@ const BlogManagement = () => {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       };
+      console.log('Fetching contents with config:', config);
       const response = await axios.get('/api/content', config);
+      console.log('Fetch response:', response);
       setContents(response.data);
     } catch (error) {
-      console.error('Error fetching contents:', error);
+      console.error('Fetch error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        config: error.config
+      });
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error || 
                           'Error fetching blog posts';
@@ -374,23 +382,54 @@ const BlogManagement = () => {
         }
       };
 
+      console.log('Submitting with data:', contentData);
+      console.log('Config:', config);
+
+      let response;
       if (editingContent) {
-        await axios.patch(`/api/content/${editingContent._id}`, contentData, config);
-        addToast('Blog post updated successfully', 'success');
+        const editUrl = `/api/content/${editingContent._id}`;
+        console.log('Making PUT request to:', editUrl);
+        try {
+          response = await axios.put(editUrl, contentData, config);
+          console.log('Edit response:', response);
+        } catch (editError) {
+          console.error('Edit request failed:', {
+            url: editUrl,
+            error: editError,
+            status: editError.response?.status,
+            data: editError.response?.data
+          });
+          throw editError;
+        }
       } else {
-        await axios.post('/api/content', contentData, config);
-        addToast('Blog post saved successfully', 'success');
+        response = await axios.post('/api/content', contentData, config);
       }
 
+      addToast(
+        editingContent ? 'Blog post updated successfully' : 'Blog post created successfully',
+        'success'
+      );
+
       handleCloseModal();
-      fetchContents();
+      await fetchContents();
     } catch (error) {
-      console.error('Error saving blog post:', error);
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          error.message || 
-                          'Error saving blog post';
-      addToast(errorMessage, 'error');
+      console.error('Submit error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        config: error.config
+      });
+      
+      if (error.message === 'Network Error') {
+        addToast('Network error. Please check your connection and try again.', 'error');
+      } else {
+        const errorMessage = error.response?.data?.message || 
+                           error.response?.data?.error || 
+                           error.message || 
+                           'Error saving blog post';
+        addToast(errorMessage, 'error');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -681,4 +720,4 @@ const BlogManagement = () => {
   );
 };
 
-export default BlogManagement; 
+export default BlogManagement;
