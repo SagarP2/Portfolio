@@ -421,7 +421,6 @@ const Projects = () => {
                   )}
                 </ProjectLinks>
                 
-              </ProjectContent>
               <ViewDetailsButton to={`/projects/${project._id}`}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -429,6 +428,7 @@ const Projects = () => {
                   </svg>
                   View Details
                 </ViewDetailsButton>
+              </ProjectContent>
             </ProjectCard>
           ))}
         </ProjectsGrid>
