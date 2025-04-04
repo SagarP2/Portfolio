@@ -210,9 +210,11 @@ const Projects = () => {
         <ProjectsGrid as={motion.div} variants={container} initial="hidden" animate="visible">
           {projects.map((project) => (
             <ProjectCard key={project._id} variants={item}>
-              <ProjectImage src={project.image} alt={project.title} />
+              <ProjectImage src={project.mainimage} alt={project.title} />
               <ProjectContent>
-                <ProjectTitle>{project.title}</ProjectTitle>
+                <ProjectTitle>{project.title}
+                  
+                </ProjectTitle>
                 <ProjectDescription>{project.description}</ProjectDescription>
                 <TechStack>
                   {project.technologies.map((tech, index) => (

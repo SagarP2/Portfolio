@@ -226,7 +226,7 @@ router.delete('/:id', auth, isAdmin, async (req, res) => {
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
-    await project.remove();
+    await Project.findByIdAndDelete(req.params.id);
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     console.error('Error deleting project:', error);

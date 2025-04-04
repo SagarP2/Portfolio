@@ -190,7 +190,7 @@ const Projects = () => {
             transition={{ delay: index * 0.1 }}
           >
             <ProjectImage>
-              <img src={project.image} alt={project.title} />
+              <img src={project.mainimage} alt={project.title} />
             </ProjectImage>
             <ProjectContent>
               <ProjectTitle>{project.title}</ProjectTitle>
