@@ -145,10 +145,38 @@ const LoadingContainer = styled.div`
   min-height: 400px;
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+`;
+
+const PaginationButton = styled.button`
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #2563eb;
+  }
+
+  &:disabled {
+    background: #a1a1aa;
+    cursor: not-allowed;
+  }
+`;
+
 const ProjectsList = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const projectsPerPage = 6; // Number of projects to display per page
 
   useEffect(() => {
     fetchProjects();
@@ -184,6 +212,10 @@ const ProjectsList = () => {
     );
   }
 
+  // Calculate total pages
+  const totalPages = Math.ceil(projects.length / projectsPerPage);
+  const currentProjects = projects.slice((currentPage - 1) * projectsPerPage, currentPage * projectsPerPage);
+
   return (
     <Container>
       <Header>
@@ -192,7 +224,7 @@ const ProjectsList = () => {
       </Header>
 
       <ProjectsGrid>
-        {projects.map((project, index) => (
+        {currentProjects.map((project, index) => (
           <ProjectCard
             key={project._id}
             initial={{ opacity: 0, y: 20 }}
@@ -225,6 +257,21 @@ const ProjectsList = () => {
           </ProjectCard>
         ))}
       </ProjectsGrid>
+
+      <PaginationContainer>
+        <PaginationButton 
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </PaginationButton>
+        <PaginationButton 
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </PaginationButton>
+      </PaginationContainer>
     </Container>
   );
 };
