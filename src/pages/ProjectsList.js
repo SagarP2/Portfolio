@@ -199,10 +199,10 @@ const ProjectsList = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <ProjectImage src={project.image} alt={project.title} />
+            <ProjectImage src={project.mainimage} alt={project.title} />
             <ProjectContent>
               <ProjectTitle>{project.title}</ProjectTitle>
-              <ProjectDescription>{project.description}</ProjectDescription>
+              <ProjectDescription>{project.shortDescription}</ProjectDescription>
               <TechnologiesContainer>
                 {project.technologies.map((tech, techIndex) => (
                   <Technology key={techIndex}>{tech}</Technology>

@@ -546,7 +546,7 @@ const ProjectManagement = () => {
               {project.subtitle && (
                 <ProjectSubtitle>{project.subtitle}</ProjectSubtitle>
               )}
-              <ProjectDescription>{project.shortDescription || project.description}</ProjectDescription>
+             
               <ProjectMeta>
                 {project.publishedYear && (
                   <MetaItem>
