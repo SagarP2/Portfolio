@@ -3,17 +3,28 @@ const mongoose = require('mongoose');
 const serviceSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
-    trim: true
+    required: [true, 'Service title is required'],
+    trim: true,
+    maxlength: [100, 'Title cannot be more than 100 characters']
+  },
+  slug: {
+    type: String,
+    required: [true, 'Service slug is required'],
+    unique: true,
+    trim: true,
+    lowercase: true
   },
   description: {
     type: String,
-    required: true,
+    required: [true, 'Service description is required'],
     trim: true
   },
   icon: {
     type: String,
-    required: true,
+    trim: true
+  },
+  coverImage: {
+    type: String,
     trim: true
   },
   createdAt: {
@@ -30,6 +41,10 @@ serviceSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
+
+serviceSchema.index({ title: 'text', description: 'text' });
+
+serviceSchema.index({ slug: 1 }, { unique: true });
 
 const Service = mongoose.model('Service', serviceSchema);
 

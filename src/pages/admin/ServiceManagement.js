@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import API from '../../api';
 import { useToast } from '../../components/Toast';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   padding: 2rem;
@@ -271,6 +272,84 @@ const CloseButton = styled.button`
   }
 `;
 
+const SubServiceSection = styled.div`
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+`;
+
+const SubServiceList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+`;
+
+const SubServiceItem = styled.div`
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  position: relative;
+`;
+
+const RemoveSubServiceButton = styled.button`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: ${props => props.theme.colors.error}15;
+  color: ${props => props.theme.colors.error};
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  
+  &:hover {
+    background: ${props => props.theme.colors.error}25;
+  }
+`;
+
+const AddSubServiceButton = styled(motion.button)`
+  margin-top: 1rem;
+  background: ${props => props.theme.colors.primary}15;
+  color: ${props => props.theme.colors.primary};
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  
+  &:hover {
+    background: ${props => props.theme.colors.primary}25;
+  }
+`;
+
+const LearnMoreButton = styled(motion.button)`
+  background: ${props => props.theme.colors.primary};
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.theme.colors.primaryDark};
+    transform: translateY(-2px);
+  }
+`;
+
 const ServiceManagement = () => {
   const [services, setServices] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -279,12 +358,14 @@ const ServiceManagement = () => {
     title: '',
     description: '',
     icon: '',
-    features: ''
+    slug: '',
+    subServices: []
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { addToast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchServices();
@@ -293,19 +374,22 @@ const ServiceManagement = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const config = {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        }
-      };
-      const response = await axios.get('/api/services', config);
-      setServices(response.data);
+      setError(null);
+      
+      const response = await API.get('/api/services');
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch services');
+      }
+
+      if (!Array.isArray(response.data.data)) {
+        throw new Error('Expected data to be an array');
+      }
+
+      setServices(response.data.data);
     } catch (error) {
       console.error('Error fetching services:', error);
-      const errorMessage = error.response?.data?.message || 
-                         error.response?.data?.error || 
-                         'Error fetching services';
-      addToast(errorMessage, 'error');
+      setError(error.message || 'Failed to load services');
+      addToast(error.message || 'Failed to load services', 'error');
     } finally {
       setLoading(false);
     }
@@ -313,49 +397,19 @@ const ServiceManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
     try {
-      const serviceData = {
-        title: formData.title,
-        description: formData.description,
-        icon: formData.icon,
-        features: formData.features.split('\n').filter(feature => feature.trim())
-      };
-
-      const config = {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json'
-        }
-      };
-
       if (editingService) {
-        await axios.put(`/api/services/${editingService._id}`, serviceData, config);
+        await API.put(`/api/services/${editingService._id}`, formData);
         addToast('Service updated successfully', 'success');
       } else {
-        await axios.post('/api/services', serviceData, config);
-        addToast('Service added successfully', 'success');
+        await API.post('/api/services', formData);
+        addToast('Service created successfully', 'success');
       }
-
-      setShowModal(false);
-      setEditingService(null);
-      setFormData({
-        title: '',
-        description: '',
-        icon: '',
-        features: ''
-      });
       fetchServices();
+      resetForm();
     } catch (error) {
       console.error('Error saving service:', error);
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          error.message || 
-                          'Error saving service';
-      addToast(errorMessage, 'error');
-    } finally {
-      setIsSubmitting(false);
+      addToast(error.message || 'Failed to save service', 'error');
     }
   };
 
@@ -365,7 +419,8 @@ const ServiceManagement = () => {
       title: service.title || '',
       description: service.description || '',
       icon: service.icon || '',
-      features: Array.isArray(service.features) ? service.features.join('\n') : ''
+      slug: service.slug || '',
+      subServices: service.subServices || []
     });
     setShowModal(true);
   };
@@ -373,20 +428,12 @@ const ServiceManagement = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this service?')) {
       try {
-        const config = {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-          }
-        };
-        await axios.delete(`/api/services/${id}`, config);
+        await API.delete(`/api/services/${id}`);
         addToast('Service deleted successfully', 'success');
         fetchServices();
       } catch (error) {
         console.error('Error deleting service:', error);
-        const errorMessage = error.response?.data?.message || 
-                           error.response?.data?.error || 
-                           'Error deleting service';
-        addToast(errorMessage, 'error');
+        addToast(error.message || 'Failed to delete service', 'error');
       }
     }
   };
@@ -397,6 +444,51 @@ const ServiceManagement = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleSubServiceChange = (index, field, value) => {
+    setFormData(prev => {
+      const newSubServices = [...prev.subServices];
+      newSubServices[index] = {
+        ...newSubServices[index],
+        [field]: value
+      };
+      return {
+        ...prev,
+        subServices: newSubServices
+      };
+    });
+  };
+
+  const addSubService = () => {
+    setFormData(prev => ({
+      ...prev,
+      subServices: [...prev.subServices, { title: '', description: '', imageUrl: '' }]
+    }));
+  };
+
+  const removeSubService = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      subServices: prev.subServices.filter((_, i) => i !== index)
+    }));
+  };
+
+  const resetForm = () => {
+    setEditingService(null);
+    setFormData({
+      title: '',
+      description: '',
+      icon: '',
+      slug: '',
+      subServices: []
+    });
+    setShowModal(false);
+  };
+
+  const handleLearnMore = (service) => {
+    console.log('Navigating to service:', service); // Debug log
+    navigate(`/services/${service._id}`);  // Changed to match the existing route pattern
   };
 
   if (loading) {
@@ -431,7 +523,8 @@ const ServiceManagement = () => {
               title: '',
               description: '',
               icon: '',
-              features: ''
+              slug: '',
+              subServices: []
             });
             setShowModal(true);
           }}
@@ -514,6 +607,19 @@ const ServiceManagement = () => {
                   Delete
                 </Button>
               </ActionButtons>
+              
+              <LearnMoreButton
+                onClick={() => handleLearnMore(service)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                Learn More
+              </LearnMoreButton>
             </ServiceContent>
           </ServiceCard>
         ))}
@@ -574,24 +680,80 @@ const ServiceManagement = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label htmlFor="features">Features (one per line)</Label>
-                <TextArea
-                  id="features"
-                  name="features"
-                  value={formData.features}
+                <Label htmlFor="slug">Slug</Label>
+                <Input
+                  type="text"
+                  id="slug"
+                  name="slug"
+                  value={formData.slug}
                   onChange={handleChange}
-                  placeholder="Enter service features (one per line)"
+                  placeholder="Enter service slug"
                   required
                 />
               </FormGroup>
 
+              <SubServiceSection>
+                <Label>Sub Services</Label>
+                <SubServiceList>
+                  {formData.subServices.map((subService, index) => (
+                    <SubServiceItem key={index}>
+                      <RemoveSubServiceButton
+                        onClick={() => removeSubService(index)}
+                        type="button"
+                      >
+                        ×
+                      </RemoveSubServiceButton>
+                      <FormGroup>
+                        <Label>Sub Service Title</Label>
+                        <Input
+                          type="text"
+                          value={subService.title}
+                          onChange={(e) => handleSubServiceChange(index, 'title', e.target.value)}
+                          placeholder="Enter sub service title"
+                          required
+                        />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label>Sub Service Description</Label>
+                        <TextArea
+                          value={subService.description}
+                          onChange={(e) => handleSubServiceChange(index, 'description', e.target.value)}
+                          placeholder="Enter sub service description"
+                          required
+                        />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label>Image URL</Label>
+                        <Input
+                          type="url"
+                          value={subService.imageUrl || ''}
+                          onChange={(e) => handleSubServiceChange(index, 'imageUrl', e.target.value)}
+                          placeholder="Enter image URL for sub service"
+                        />
+                      </FormGroup>
+                    </SubServiceItem>
+                  ))}
+                </SubServiceList>
+                <AddSubServiceButton
+                  type="button"
+                  onClick={addSubService}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Add Sub Service
+                </AddSubServiceButton>
+              </SubServiceSection>
+
               <Button
                 type="submit"
-                disabled={isSubmitting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {isSubmitting ? 'Saving...' : editingService ? 'Update Service' : 'Add Service'}
+                {editingService ? 'Update Service' : 'Add Service'}
               </Button>
             </Form>
           </ModalContent>
