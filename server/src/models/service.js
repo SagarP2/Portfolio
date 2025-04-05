@@ -84,8 +84,6 @@ serviceSchema.pre('save', function(next) {
 
 serviceSchema.index({ title: 'text', description: 'text' });
 
-serviceSchema.index({ slug: 1 }, { unique: true });
-
 const Service = mongoose.model('Service', serviceSchema);
 
 module.exports = Service; 

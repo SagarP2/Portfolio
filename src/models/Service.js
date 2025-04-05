@@ -86,9 +86,6 @@ serviceSchema.pre('save', function(next) {
 // Add text index for search functionality
 serviceSchema.index({ title: 'text', description: 'text' });
 
-// Add unique index for slug
-serviceSchema.index({ slug: 1 }, { unique: true });
-
 const Service = mongoose.model('Service', serviceSchema);
 
 export default Service; 

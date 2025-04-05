@@ -104,6 +104,8 @@ const SubServiceImage = styled.img`
   object-fit: cover;
   display: block;
   background-color: #f0f0f0;
+  min-height: 200px; /* Ensure minimum height even before loading */
+  border-bottom: 1px solid #eee;
 `;
 
 const SubServiceContent = styled.div`
@@ -391,14 +393,14 @@ const ServiceDetails = () => {
         {
           "title": "Sub-services",
           "description": "Sub-services Description",
-          "imageUrl": "https://via.placeholder.com/800x400/6d43b8/ffffff?text=Sub-services",
+          "imageUrl": "https://placehold.co/800x400/6d43b8/ffffff?text=Sub-services",
           "features": [],
           "_id": "67f0eec59a0bdd0a4cb8741a"
         },
         {
           "title": "Second sub service",
           "description": "Second sub",
-          "imageUrl": "https://via.placeholder.com/800x400/9a7ed0/ffffff?text=Second+Sub+Service",
+          "imageUrl": "https://placehold.co/800x400/9a7ed0/ffffff?text=Second+Sub+Service",
           "features": [],
           "_id": "67f0eec59a0bdd0a4cb8741b"
         }
@@ -412,10 +414,8 @@ const ServiceDetails = () => {
     // Only fall back to API call if no database data is available
     // (keeping this part as fallback, but it won't run with the above code)
     if (false && stateData.title && stateData.description && stateData.slug) {
-      console.log('Using state data:', stateData);
       // Make sure subServices exists even on state data
       if (!stateData.subServices) {
-        console.log('No subServices in state data, creating empty array');
         stateData.subServices = [];
       }
       setService(stateData);
@@ -426,30 +426,18 @@ const ServiceDetails = () => {
     const fetchServiceDetails = async () => {
       try {
         setLoading(true);
-        console.log('Fetching service with slug:', slug);
         
         // Directly use the API.get method with the full URL for debugging
         const response = await API.get(`/api/services/slug/${slug}`);
-        
-        console.log('API Response full data:', response);
         
         if (!response.data || !response.data.success) {
           throw new Error((response.data && response.data.message) || 'Failed to fetch service details');
         }
         
         const serviceData = response.data.data;
-        console.log('Service data structure:', JSON.stringify(serviceData, null, 2));
-        
-        // Log the subServices specifically to see their structure
-        if (serviceData.subServices) {
-          console.log('SubServices data structure:', JSON.stringify(serviceData.subServices, null, 2));
-        } else {
-          console.log('No subServices found in the response');
-        }
         
         // Ensure subServices is always an array, even if it's null or undefined
         if (!serviceData.subServices) {
-          console.log('Creating empty subServices array');
           serviceData.subServices = [];
         }
         
@@ -468,6 +456,31 @@ const ServiceDetails = () => {
       fetchServiceDetails();
     }
   }, [slug, stateData]);
+  
+  // Add debug effect to check image URLs (moved before conditionals)
+  useEffect(() => {
+    if (!service || !service.subServices) return;
+    
+    const subServices = service.subServices;
+    // Check each subService image
+    if (subServices.length > 0) {
+      subServices.forEach((subService, index) => {
+        if (subService.imageUrl) {
+          // Test image loading
+          const testImage = new Image();
+          testImage.onload = () => console.log(`Image ${index} loaded: ${subService.imageUrl}`);
+          testImage.onerror = () => {
+            console.error(`Image ${index} failed to load: ${subService.imageUrl}`);
+            // If we're in development, suggest a solution
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`Try using a reliable image service like: https://placehold.co/800x400`);
+            }
+          };
+          testImage.src = subService.imageUrl;
+        }
+      });
+    }
+  }, [service]);
 
   if (loading) {
     return (
@@ -498,26 +511,6 @@ const ServiceDetails = () => {
     ? service.subServices 
     : [];
   
-  console.log('Final subServices for rendering:', subServices);
-  console.log('Number of subServices:', subServices.length);
-  
-  // Debug each subService
-  subServices.forEach((subService, index) => {
-    console.log(`SubService ${index}:`, subService);
-    console.log(`  - Title: ${subService.title}`);
-    console.log(`  - Description: ${subService.description}`);
-    console.log(`  - ImageUrl: ${subService.imageUrl}`);
-    
-    // Check if image URL exists and is valid
-    if (subService.imageUrl) {
-      console.log(`  - Testing image load for: ${subService.imageUrl}`);
-      const img = new Image();
-      img.onload = () => console.log(`  - Image loaded successfully: ${subService.imageUrl}`);
-      img.onerror = () => console.log(`  - Image failed to load: ${subService.imageUrl}`);
-      img.src = subService.imageUrl;
-    }
-  });
-
   return (
     <Container>
       <ServiceHeader>
@@ -539,12 +532,16 @@ const ServiceDetails = () => {
               {subServices.map((subService, index) => (
                 <SubServiceCard key={index}>
                   <SubServiceImage 
-                    src={subService.imageUrl || 'https://via.placeholder.com/800x400?text=No+Image'} 
+                    src={subService.imageUrl || 'https://placehold.co/800x400/cccccc/666666?text=No+Image'}
                     alt={subService.title || 'Untitled Service'} 
+                    onLoad={(e) => {
+                      // Image loaded successfully, make sure it's visible
+                      e.target.style.display = 'block';
+                    }}
                     onError={(e) => {
-                      console.error('Image failed to load:', e.target.src);
+                      // On error, replace with fallback image
                       e.target.onerror = null; // Prevents infinite loop
-                      e.target.src = 'https://via.placeholder.com/800x400?text=Image+Not+Available';
+                      e.target.src = 'https://placehold.co/800x400/cccccc/666666?text=Image+Not+Available';
                     }}
                   />
                   <SubServiceContent>
@@ -552,9 +549,7 @@ const ServiceDetails = () => {
                     <SubServiceDescription>
                       {subService.description || 'No description available'}
                     </SubServiceDescription>
-                    <SubServiceFooter>
-                      <LearnMoreButton>Learn More</LearnMoreButton>
-                    </SubServiceFooter>
+                    
                   </SubServiceContent>
                 </SubServiceCard>
               ))}

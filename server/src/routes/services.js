@@ -7,12 +7,10 @@ const { auth } = require('../middleware/auth');
 // Get all services
 router.get('/', async (req, res) => {
   try {
-    console.log('Fetching all services...');
     const services = await Service.find()
       .select('-__v')
       .sort({ createdAt: -1 });
     
-    console.log('Services found:', services.length);
     res.json({ 
       success: true, 
       data: services,
@@ -86,11 +84,9 @@ router.get('/:serviceId/subservices', async (req, res) => {
 // Create a new service
 router.post('/', auth, async (req, res) => {
   try {
-    console.log('Creating new service:', req.body);
     const service = new Service(req.body);
     await service.save();
     
-    console.log('Service created successfully:', service.title);
     res.status(201).json({ 
       success: true, 
       data: service,
