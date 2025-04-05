@@ -130,7 +130,16 @@ const Services = () => {
           throw new Error(response.data.message || 'Failed to fetch services');
         }
         
-        setServices(response.data.data);
+        const servicesData = response.data.data;
+        console.log('Services data:', servicesData);
+        
+        // Log icon information for debugging
+        servicesData.forEach(service => {
+          console.log(`Service "${service.title}" icon:`, service.icon);
+          console.log(`Icon type:`, typeof service.icon);
+        });
+        
+        setServices(servicesData);
       } catch (err) {
         console.error('Error fetching services:', err);
         setError(err.message || 'Failed to load services');
@@ -186,11 +195,24 @@ const Services = () => {
             transition={{ duration: 0.3 }}
           >
             <h3>
-              {service.icon && <img src={service.icon} alt={service.title} />}
+              {service.icon && (
+                service.icon.startsWith('http') ? 
+                <img src={service.icon} alt={service.title} /> : 
+                <span style={{ fontSize: '24px', marginRight: '10px' }}>{service.icon}</span>
+              )}
               {service.title}
             </h3>
             <p>{service.description}</p>
-            <ServiceLink to={`/services/${service.slug}`}>
+            <ServiceLink 
+              to={`/services/${service.slug}`}
+              state={{ 
+                title: service.title, 
+                description: service.description, 
+                slug: service.slug,
+                icon: service.icon,
+                subServices: service.subServices
+              }}
+            >
               Learn More
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14"/>

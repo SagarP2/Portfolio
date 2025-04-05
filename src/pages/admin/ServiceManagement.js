@@ -398,11 +398,20 @@ const ServiceManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const serviceData = {
+        ...formData,
+        subServices: formData.subServices.map(sub => ({
+          title: sub.title,
+          description: sub.description,
+          imageUrl: sub.imageUrl
+        }))
+      };
+
       if (editingService) {
-        await API.put(`/api/services/${editingService._id}`, formData);
+        await API.put(`/api/services/${editingService._id}`, serviceData);
         addToast('Service updated successfully', 'success');
       } else {
-        await API.post('/api/services', formData);
+        await API.post('/api/services', serviceData);
         addToast('Service created successfully', 'success');
       }
       fetchServices();
@@ -420,7 +429,7 @@ const ServiceManagement = () => {
       description: service.description || '',
       icon: service.icon || '',
       slug: service.slug || '',
-      subServices: service.subServices || []
+      subServices: service.subServices || []  // This will now load existing sub-services
     });
     setShowModal(true);
   };
@@ -763,4 +772,4 @@ const ServiceManagement = () => {
   );
 };
 
-export default ServiceManagement; 
+export default ServiceManagement;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import API from '../../api';
+import API, { fetchServices, createService, updateService, deleteService } from '../../api';
 
 const ServiceManagementContainer = styled.div`
   padding: ${props => props.theme.spacing.xl};
@@ -137,23 +137,26 @@ const ServiceManagement = () => {
     longDescription: '',
     process: '',
     features: [''],
+    slug: '',
+    icon: '',
     subServices: [{
       title: '',
       description: '',
-      features: ['']
+      features: [''],
+      imageUrl: ''
     }]
   });
 
   useEffect(() => {
-    fetchServices();
+    fetchServicesData();
   }, []);
 
-  const fetchServices = async () => {
+  const fetchServicesData = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await API.get('/api/services');
+      const response = await fetchServices();
       if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to fetch services');
       }
@@ -162,6 +165,9 @@ const ServiceManagement = () => {
         throw new Error('Expected data to be an array');
       }
 
+      // Log the full service objects to verify if subServices are included
+      console.log('Services received from API:', JSON.stringify(response.data.data, null, 2));
+      
       setServices(response.data.data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -179,10 +185,18 @@ const ServiceManagement = () => {
         const updatedSubServices = [...formData.subServices];
         updatedSubServices[index].features[subIndex] = value;
         setFormData({ ...formData, subServices: updatedSubServices });
-      } else if (name === 'subServiceTitle' || name === 'subServiceDescription') {
-        // Handle sub-service title or description
+      } else if (name === 'subServiceTitle' || name === 'subServiceDescription' || name === 'subServiceImageUrl') {
+        // Handle sub-service fields
         const updatedSubServices = [...formData.subServices];
-        updatedSubServices[index][name === 'subServiceTitle' ? 'title' : 'description'] = value;
+        
+        if (name === 'subServiceTitle') {
+          updatedSubServices[index].title = value;
+        } else if (name === 'subServiceDescription') {
+          updatedSubServices[index].description = value;
+        } else if (name === 'subServiceImageUrl') {
+          updatedSubServices[index].imageUrl = value;
+        }
+        
         setFormData({ ...formData, subServices: updatedSubServices });
       } else {
         // Handle main service features
@@ -208,32 +222,131 @@ const ServiceManagement = () => {
   const addSubService = () => {
     setFormData({
       ...formData,
-      subServices: [...formData.subServices, { title: '', description: '', features: [''] }]
+      subServices: [...formData.subServices, { title: '', description: '', features: [''], imageUrl: '' }]
+    });
+  };
+
+  const removeSubService = (index) => {
+    const updatedSubServices = [...formData.subServices];
+    updatedSubServices.splice(index, 1);
+    
+    // Ensure there's always at least one sub-service form field
+    if (updatedSubServices.length === 0) {
+      updatedSubServices.push({ title: '', description: '', features: [''], imageUrl: '' });
+    }
+    
+    setFormData({
+      ...formData,
+      subServices: updatedSubServices
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editingService) {
-        await API.put(`/api/services/${editingService._id}`, formData);
-      } else {
-        await API.post('/api/services', formData);
+      setLoading(true);
+      setError(null);
+      
+      // Extract main service data and filter sub-services
+      const { subServices, ...mainServiceData } = { ...formData };
+      
+      // Filter out empty sub-services (keeping the structure even if empty)
+      const filteredSubServices = subServices
+        .filter(sub => sub.title.trim() !== '' || sub.description.trim() !== '')
+        .map(sub => ({
+          _id: sub._id || undefined,
+          title: sub.title.trim(),
+          description: sub.description.trim(),
+          imageUrl: sub.imageUrl || 'https://via.placeholder.com/300',
+          features: Array.isArray(sub.features) ? sub.features.filter(feature => feature.trim() !== '') : []
+        }));
+      
+      // Generate a slug if not provided
+      if (!mainServiceData.slug && mainServiceData.title) {
+        mainServiceData.slug = mainServiceData.title
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
       }
-      fetchServices();
+      
+      console.log('Submitting service data with subServices:', {
+        ...mainServiceData,
+        subServices: filteredSubServices
+      });
+      
+      let response;
+
+      if (editingService) {
+        // Update the main service with subServices
+        response = await updateService(editingService._id, {
+          ...mainServiceData,
+          subServices: filteredSubServices
+        });
+        console.log('Update service response:', response);
+      } else {
+        // Create the main service with subServices
+        response = await createService({
+          ...mainServiceData,
+          subServices: filteredSubServices
+        });
+        console.log('Create service response:', response);
+      }
+      
+      // Success message
+      alert(editingService ? 'Service updated successfully!' : 'Service created successfully!');
+      
+      // Refresh services and reset form
+      await fetchServicesData();
       resetForm();
     } catch (error) {
       console.error('Error saving service:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Unknown error occurred';
+      setError(`Failed to save service: ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this service?')) {
       try {
-        await API.delete(`/api/services/${id}`);
-        fetchServices();
+        setLoading(true);
+        setError(null);
+        
+        // Log the request details for debugging
+        console.log('Attempting to delete service with ID:', id);
+        
+        // Make the delete request using the helper function
+        const response = await deleteService(id);
+        console.log('Delete response:', response);
+        
+        // Show success message and refresh the services list
+        alert('Service deleted successfully!');
+        await fetchServicesData();
       } catch (error) {
         console.error('Error deleting service:', error);
+        
+        // Extract error details
+        const statusCode = error.response?.status;
+        const errorMessage = error.response?.data?.message || error.message || 'Unknown error occurred';
+        
+        console.log('Error status code:', statusCode);
+        console.log('Error message:', errorMessage);
+        
+        // Show appropriate error message
+        if (statusCode === 404) {
+          setError(`Service not found. It may have been already deleted.`);
+        } else if (statusCode === 401) {
+          setError(`Authentication error. Please log in again.`);
+          setTimeout(() => {
+            window.location.href = '/admin/login';
+          }, 2000);
+        } else {
+          setError(`Failed to delete service: ${errorMessage}`);
+        }
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -245,28 +358,56 @@ const ServiceManagement = () => {
       longDescription: '',
       process: '',
       features: [''],
+      slug: '',
+      icon: '',
       subServices: [{
         title: '',
         description: '',
-        features: ['']
+        features: [''],
+        imageUrl: ''
       }]
     });
     setEditingService(null);
   };
 
-  const editService = (service) => {
+  const editService = async (service) => {
     setEditingService(service);
-    setFormData({
+    
+    // Get sub-services directly from the service object
+    const subServicesData = Array.isArray(service.subServices) ? service.subServices : [];
+    
+    console.log('Editing service with subServices:', {
+      serviceId: service._id,
       title: service.title,
-      description: service.description,
+      subServicesCount: subServicesData.length,
+      subServices: subServicesData
+    });
+    
+    // If no sub-services found, provide an empty form for adding them
+    const preparedSubServices = subServicesData.length > 0 
+      ? subServicesData.map(sub => ({
+          _id: sub._id,
+          title: sub.title || '',
+          description: sub.description || '',
+          imageUrl: sub.imageUrl || '',
+          features: Array.isArray(sub.features) ? sub.features : ['']
+        }))
+      : [{
+          title: '',
+          description: '',
+          features: [''],
+          imageUrl: ''
+        }];
+    
+    setFormData({
+      title: service.title || '',
+      description: service.description || '',
       longDescription: service.longDescription || '',
       process: service.process || '',
-      features: service.features || [''],
-      subServices: service.subServices || [{
-        title: '',
-        description: '',
-        features: ['']
-      }]
+      features: Array.isArray(service.features) ? service.features : [''],
+      slug: service.slug || '',
+      icon: service.icon || '',
+      subServices: preparedSubServices
     });
   };
 
@@ -362,6 +503,17 @@ const ServiceManagement = () => {
         <h3>Sub Services</h3>
         {formData.subServices.map((subService, index) => (
           <div key={index} style={{ marginBottom: '20px', padding: '15px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <h4 style={{ margin: 0 }}>Sub Service #{index + 1}</h4>
+              <Button 
+                type="button" 
+                className="delete"
+                onClick={() => removeSubService(index)}
+                style={{ padding: '2px 8px', fontSize: '0.8rem' }}
+              >
+                Remove
+              </Button>
+            </div>
             <FormGroup>
               <label>Sub Service Title</label>
               <input
@@ -380,6 +532,17 @@ const ServiceManagement = () => {
                 value={subService.description}
                 onChange={(e) => handleInputChange(e, null, index)}
                 placeholder="Enter sub service description"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <label>Image URL</label>
+              <input
+                type="text"
+                name="subServiceImageUrl"
+                value={subService.imageUrl}
+                onChange={(e) => handleInputChange(e, null, index)}
+                placeholder="Enter image URL (required)"
               />
             </FormGroup>
 
@@ -428,6 +591,11 @@ const ServiceManagement = () => {
           >
             <h3>{service.title}</h3>
             <p>{service.description}</p>
+            {Array.isArray(service.subServices) && (
+              <p style={{ marginTop: '10px', fontSize: '0.9em', color: 'var(--color-primary)' }}>
+                {service.subServices.length} Sub-Service{service.subServices.length !== 1 ? 's' : ''}
+              </p>
+            )}
             <div style={{ marginTop: '15px' }}>
               <Button onClick={() => editService(service)}>Edit</Button>
               <Button className="delete" onClick={() => handleDelete(service._id)}>

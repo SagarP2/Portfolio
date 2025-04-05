@@ -1,5 +1,28 @@
 const mongoose = require('mongoose');
 
+// Define the SubService schema for embedded documents
+const subServiceSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, 'Sub-service title is required'],
+    trim: true,
+    maxlength: [100, 'Title cannot be more than 100 characters']
+  },
+  description: {
+    type: String,
+    required: [true, 'Sub-service description is required'],
+    trim: true
+  },
+  imageUrl: {
+    type: String,
+    trim: true
+  },
+  features: {
+    type: [String],
+    default: []
+  }
+});
+
 const serviceSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -19,6 +42,18 @@ const serviceSchema = new mongoose.Schema({
     required: [true, 'Service description is required'],
     trim: true
   },
+  longDescription: {
+    type: String,
+    trim: true
+  },
+  process: {
+    type: String,
+    trim: true
+  },
+  features: {
+    type: [String],
+    default: []
+  },
   icon: {
     type: String,
     trim: true
@@ -26,6 +61,11 @@ const serviceSchema = new mongoose.Schema({
   coverImage: {
     type: String,
     trim: true
+  },
+  // Add subServices as an embedded array of documents
+  subServices: {
+    type: [subServiceSchema],
+    default: []
   },
   createdAt: {
     type: Date,
