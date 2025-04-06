@@ -10,6 +10,7 @@ import ServiceManagement from './admin/ServiceManagement';
 import ContentManagement from './admin/ContentManagement';
 import DashboardAnalytics from '../components/DashboardAnalytics';
 import NewContent from './admin/NewContent';
+import SubServiceManagement from '../components/admin/SubServiceManagement';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -293,7 +294,7 @@ const ManagementCard = styled(motion.div)`
 `;
 
 const AdminDashboard = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -306,68 +307,37 @@ const AdminDashboard = () => {
     <DashboardContainer>
       <BackgroundGradient />
       <Sidebar
-        initial={{ x: -280 }}
-        animate={{ x: 0 }}
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
         <SidebarHeader>
           <DashboardTitle>Admin Dashboard</DashboardTitle>
+          <p>Welcome, {user?.username}</p>
         </SidebarHeader>
 
         <NavSection>
-          <NavHeader>Content Management</NavHeader>
-          <NavLink to="/admin" active={location.pathname === '/admin' ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7"/>
-              <rect x="14" y="3" width="7" height="7"/>
-              <rect x="14" y="14" width="7" height="7"/>
-              <rect x="3" y="14" width="7" height="7"/>
-            </svg>
+          <NavHeader>Navigation</NavHeader>
+          <NavLink to="/admin" active={location.pathname === '/admin'}>
             Dashboard
           </NavLink>
-          <NavLink to="/admin/projects" active={location.pathname === '/admin/projects' ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-            </svg>
+          <NavLink to="/admin/projects" active={location.pathname === '/admin/projects'}>
             Projects
           </NavLink>
-          <NavLink to="/admin/services" active={location.pathname === '/admin/services' ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-            </svg>
+          <NavLink to="/admin/services" active={location.pathname === '/admin/services'}>
             Services
           </NavLink>
-          <NavLink to="/admin/content" active={location.pathname === '/admin/content' ? 1 : 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg>
-            Blog
+          <NavLink to="/admin/content" active={location.pathname === '/admin/content'}>
+            Content
+          </NavLink>
+          <NavLink to="/admin/subservices" active={location.pathname === '/admin/subservices'}>
+            Sub-Services
           </NavLink>
         </NavSection>
 
-        <LogoutButton
-          onClick={handleLogout}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
+        <LogoutButton onClick={handleLogout}>
           Logout
         </LogoutButton>
-
-        <BackToSiteButton>
-          <BackToSiteLink to="/">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            Back to Site
-          </BackToSiteLink>
-        </BackToSiteButton>
       </Sidebar>
 
       <MainContent
@@ -377,10 +347,10 @@ const AdminDashboard = () => {
       >
         <Routes>
           <Route path="/" element={<DashboardAnalytics />} />
-          <Route path="/projects/*" element={<ProjectManagement />} />
+          <Route path="/projects" element={<ProjectManagement />} />
           <Route path="/services" element={<ServiceManagement />} />
-          <Route path="/content/*" element={<ContentManagement />} />
-          <Route path="/new-content" element={<NewContent />} />
+          <Route path="/content" element={<ContentManagement />} />
+          <Route path="/subservices" element={<SubServiceManagement />} />
         </Routes>
       </MainContent>
     </DashboardContainer>

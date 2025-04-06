@@ -1,212 +1,244 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { motion, useScroll, useTransform, useSpring, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-
-const PageContainer = styled(motion.div)`
-  min-height: 100vh;
-  position: relative;
-  padding: 7rem 1rem 3rem;
-  overflow-x: hidden;
-`;
-
-const Container = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-  
-  @media (min-width: 768px) {
-    padding: 0 2rem;
-  }
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin-bottom: 5rem;
-`;
-
-const Title = styled(motion.h1)`
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: var(--color-heading);
-  
-  @media (min-width: 768px) {
-    font-size: 3.5rem;
-  }
-`;
-
-const SubTitle = styled(motion.p)`
-  font-size: 1.125rem;
-  max-width: 600px;
-  margin: 0 auto;
-  color: var(--color-text-secondary);
-`;
+import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import API from '../api';
 
 const ServicesContainer = styled.div`
   padding: 4rem 2rem;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+`;
+
+const ServicesHeader = styled.div`
+  text-align: center;
+  margin-bottom: 4rem;
+
+  h1 {
+    font-size: 3rem;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+    
+    &:after {
+      content: '';
+      position: absolute;
+      width: 60px;
+      height: 4px;
+      background: var(--color-primary);
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+  }
+
+  p {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    max-width: 800px;
+    margin: 1.5rem auto 0;
+  }
 `;
 
 const ServicesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.5rem;
+`;
+
+const IconWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  height: 80px;
+  width: 80px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  box-shadow: 0 8px 20px rgba(var(--color-primary-rgb), 0.3);
+  font-size: 32px;
+  color: white;
+  margin: 0 auto 1.5rem;
+  transition: all 0.4s ease;
+  
+  img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
 `;
 
 const ServiceCard = styled(motion.div)`
-  background: rgba(18, 18, 18, 0.8);
+  position: relative;
+  background: rgba(25, 25, 30, 0.7);
   backdrop-filter: blur(10px);
   border-radius: 16px;
-  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 2.5rem 2rem;
+  transition: all 0.4s ease;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
+  align-items: center;
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
   }
 
-  .icon {
-    width: 64px;
-    height: 64px;
-    background: rgba(37, 99, 235, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: ${props => props.theme.colors.primary};
-    font-size: 1.5rem;
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(var(--color-primary-rgb), 0.2);
+    
+    &:before {
+      opacity: 1;
+    }
+    
+    ${IconWrapper} {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 12px 30px rgba(var(--color-primary-rgb), 0.4);
+    }
   }
 
   h3 {
+    color: var(--color-text);
+    margin-bottom: 1rem;
+    text-align: center;
     font-size: 1.5rem;
-    color: ${props => props.theme.colors.text};
-    margin: 0;
+    font-weight: 600;
   }
 
   p {
-    color: ${props => props.theme.colors.textSecondary};
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+    text-align: center;
     line-height: 1.6;
-    margin: 0;
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 4.8em; /* 3 lines * 1.6 line-height */
   }
 `;
 
-const PageTitle = styled.h1`
-  font-size: 2.5rem;
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 1rem;
-  text-align: center;
-`;
-
-const PageDescription = styled.p`
-  color: ${props => props.theme.colors.textSecondary};
-  text-align: center;
-  max-width: 600px;
-  margin: 0 auto;
-  font-size: 1.1rem;
-  line-height: 1.6;
-`;
-
-const CTASection = styled(motion.div)`
-  margin-top: 5rem;
-  text-align: center;
-  padding: 3rem 2rem;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-`;
-
-const CTATitle = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: var(--color-heading);
-`;
-
-const CTADescription = styled.p`
-  max-width: 600px;
-  margin: 0 auto 2rem;
-  color: var(--color-text-secondary);
-`;
-
-const Button = styled.a`
+const ServiceLink = styled(Link)`
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--color-primary);
-  color: white;
-  border-radius: 0.5rem;
-  font-weight: 500;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: 30px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  box-shadow: 0 4px 15px rgba(var(--color-primary-rgb), 0.3);
   transition: all 0.3s ease;
-  cursor: pointer;
+  position: relative;
+  overflow: hidden;
   
-  &:hover {
-    background-color: var(--color-primary-dark);
-    transform: translateY(-2px);
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
   
   svg {
-    margin-left: 0.5rem;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease;
   }
-`;
+  
+  span {
+    position: relative;
+    z-index: 1;
+  }
 
-const BackgroundShape = styled(motion.div)`
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.1;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%);
-  z-index: -1;
-  filter: blur(60px);
-`;
-
-// Animation variants
-const containerVariants = {
-  initial: { opacity: 0 },
-  animate: { 
-    opacity: 1,
-    transition: { 
-      duration: 0.5,
-      staggerChildren: 0.1 
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(var(--color-primary-rgb), 0.4);
+    
+    &:before {
+      opacity: 1;
     }
-  },
-  exit: { opacity: 0 }
-};
-
-const itemVariants = {
-  initial: { y: 20, opacity: 0 },
-  animate: { 
-    y: 0, 
-    opacity: 1,
-    transition: { duration: 0.5 }
+    
+    svg {
+      transform: translateX(3px);
+    }
   }
-};
+`;
 
-const shapeVariants = {
-  initial: { scale: 0.8, opacity: 0 },
-  animate: { 
-    scale: 1, 
-    opacity: 0.1,
-    transition: { duration: 1, ease: "easeOut" }
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  gap: 1rem;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
   }
-};
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const ErrorMessage = styled.div`
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-error);
+  background: rgba(255, 0, 0, 0.1);
+  border-radius: 8px;
+  margin: 1rem 0;
+`;
 
 const Services = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get('/api/services');
-        setServices(response.data);
-      } catch (error) {
-        console.error('Error fetching services:', error);
+        setLoading(true);
+        setError(null);
+        
+        const response = await API.get('/api/services');
+        if (!response.data.success) {
+          throw new Error(response.data.message || 'Failed to fetch services');
+        }
+        
+        setServices(response.data.data);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+        setError(err.message || 'Failed to load services');
       } finally {
         setLoading(false);
       }
@@ -215,24 +247,75 @@ const Services = () => {
     fetchServices();
   }, []);
 
+  if (loading) {
+    return (
+      <ServicesContainer>
+        <LoadingSpinner>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="2" x2="12" y2="6"/>
+            <line x1="12" y1="18" x2="12" y2="22"/>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+            <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+            <line x1="2" y1="12" x2="6" y2="12"/>
+            <line x1="18" y1="12" x2="22" y2="12"/>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
+            <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+          </svg>
+          Loading services...
+        </LoadingSpinner>
+      </ServicesContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <ServicesContainer>
+        <ErrorMessage>{error}</ErrorMessage>
+      </ServicesContainer>
+    );
+  }
+
   return (
     <ServicesContainer>
-      <PageTitle>Our Services</PageTitle>
-      <PageDescription>
-        We offer a comprehensive range of digital solutions to help your business thrive in the modern world.
-      </PageDescription>
+      <ServicesHeader>
+        <h1>Our Services</h1>
+        <p>Explore our comprehensive range of services designed to meet your business needs</p>
+      </ServicesHeader>
 
       <ServicesGrid>
-        {services.map((service, index) => (
+        {services.map((service) => (
           <ServiceCard
             key={service._id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ duration: 0.5, delay: 0.1 * (services.indexOf(service) % 3) }}
+            whileHover={{ scale: 1.02 }}
           >
-            <div className="icon" dangerouslySetInnerHTML={{ __html: service.icon }} />
+            <IconWrapper>
+              {service.icon && (
+                service.icon.startsWith('http') ? 
+                <img src={service.icon} alt={service.title} /> : 
+                <span>{service.icon}</span>
+              )}
+            </IconWrapper>
             <h3>{service.title}</h3>
             <p>{service.description}</p>
+            <ServiceLink 
+              to={`/services/${service.slug}`}
+              state={{ 
+                title: service.title, 
+                description: service.description, 
+                slug: service.slug,
+                icon: service.icon,
+                subServices: service.subServices
+              }}
+            >
+              <span>Learn More</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </ServiceLink>
           </ServiceCard>
         ))}
       </ServicesGrid>
@@ -240,4 +323,4 @@ const Services = () => {
   );
 };
 
-export default Services; 
+export default Services;

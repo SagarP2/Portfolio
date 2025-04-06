@@ -15,11 +15,19 @@ API.interceptors.request.use(
     const token = localStorage.getItem('admin_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Adding token to request:', `Bearer ${token.substring(0, 10)}...`);
     } else {
-      console.warn('No auth token found in localStorage');
+      // Try to get token from sessionStorage as fallback
+      const sessionToken = sessionStorage.getItem('admin_token');
+      if (sessionToken) {
+        config.headers.Authorization = `Bearer ${sessionToken}`;
+        console.log('Using session token for request');
+      } else {
+        console.warn('No auth token found in storage');
+      }
     }
     console.log('Making request to:', config.baseURL + config.url);
-    console.log('Request headers:', config.headers);
+    console.log('Request method:', config.method.toUpperCase());
     return config;
   },
   (error) => {
@@ -64,6 +72,14 @@ export const fetchProjectById = (id) => API.get(`/api/projects/${id}`);
 export const createProject = (newProject) => API.post('/api/projects', newProject);
 export const updateProject = (id, updatedProject) => API.patch(`/api/projects/${id}`, updatedProject);
 export const deleteProject = (id) => API.delete(`/api/projects/${id}`);
+
+// Services API calls
+export const fetchServices = () => API.get('/api/services');
+export const fetchServiceBySlug = (slug) => API.get(`/api/services/slug/${slug}`);
+export const fetchServiceById = (id) => API.get(`/api/services/${id}`);
+export const createService = (newService) => API.post('/api/services', newService);
+export const updateService = (id, updatedService) => API.put(`/api/services/${id}`, updatedService);
+export const deleteService = (id) => API.delete(`/api/services/${id}`);
 
 // Content API calls
 export const fetchContents = () => API.get('/api/content');

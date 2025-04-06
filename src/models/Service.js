@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // Define the SubService schema for embedded documents
 const subServiceSchema = new mongoose.Schema({
@@ -62,7 +62,7 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  // Add subServices as an embedded array of documents
+  // Add subServices as an embedded array of documents with a default empty array
   subServices: {
     type: [subServiceSchema],
     default: []
@@ -77,13 +77,15 @@ const serviceSchema = new mongoose.Schema({
   }
 });
 
+// Update the updatedAt field before saving
 serviceSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
 
+// Add text index for search functionality
 serviceSchema.index({ title: 'text', description: 'text' });
 
 const Service = mongoose.model('Service', serviceSchema);
 
-module.exports = Service; 
+export default Service; 

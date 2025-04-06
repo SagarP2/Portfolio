@@ -1,16 +1,18 @@
-const express = require('express');
+import express from 'express';
+import Service from '../models/Service';
+import SubService from '../models/SubService';
+
 const router = express.Router();
-const Service = require('../models/service');
-const SubService = require('../models/SubService');
-const { auth } = require('../middleware/auth');
 
 // Get all services
 router.get('/', async (req, res) => {
   try {
+    console.log('Fetching all services...');
     const services = await Service.find()
       .select('-__v')
       .sort({ createdAt: -1 });
     
+    console.log('Services found:', services.length);
     res.json({ 
       success: true, 
       data: services,
@@ -57,36 +59,27 @@ router.get('/slug/:slug', async (req, res) => {
   }
 });
 
-// Get all sub-services for a service
-router.get('/:serviceId/subservices', async (req, res) => {
+// Get service by ID
+router.get('/:id', async (req, res) => {
   try {
-    console.log('Fetching sub-services for service:', req.params.serviceId);
-    const subServices = await SubService.find({ serviceId: req.params.serviceId })
-      .select('-__v')
-      .sort({ order: 1 });
-    
-    console.log('Sub-services found:', subServices.length);
-    res.json({ 
-      success: true, 
-      data: subServices,
-      message: 'Sub-services fetched successfully'
-    });
+    const service = await Service.findById(req.params.id).select('-__v');
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+    res.json(service);
   } catch (error) {
-    console.error('Error fetching sub-services:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching sub-services', 
-      error: error.message 
-    });
+    res.status(500).json({ message: 'Error fetching service', error: error.message });
   }
 });
 
 // Create a new service
-router.post('/', auth, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
+    console.log('Creating new service:', req.body);
     const service = new Service(req.body);
     await service.save();
     
+    console.log('Service created successfully:', service.title);
     res.status(201).json({ 
       success: true, 
       data: service,
@@ -103,7 +96,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Update a service
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     console.log('Updating service:', req.params.id);
     const service = await Service.findByIdAndUpdate(
@@ -137,7 +130,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // Delete a service
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     console.log('Deleting service:', req.params.id);
     const service = await Service.findByIdAndDelete(req.params.id);
@@ -168,37 +161,40 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// Create a new sub-service
-router.post('/:serviceId/subservices', auth, async (req, res) => {
+// Get all sub-services for a service
+router.get('/:serviceId/subservices', async (req, res) => {
   try {
-    console.log('Creating new sub-service for service:', req.params.serviceId);
+    console.log('Fetching sub-services for service:', req.params.serviceId);
+    const subServices = await SubService.find({ serviceId: req.params.serviceId })
+      .select('-__v')
+      .sort({ order: 1 });
     
-    // Verify if the service exists
-    const service = await Service.findById(req.params.serviceId);
-    if (!service) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Service not found' 
-      });
-    }
-    
-    // Create the sub-service
-    const subServiceData = {
+    console.log('Sub-services found:', subServices.length);
+    res.json({ 
+      success: true, 
+      data: subServices,
+      message: 'Sub-services fetched successfully'
+    });
+  } catch (error) {
+    console.error('Error fetching sub-services:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching sub-services', 
+      error: error.message 
+    });
+  }
+});
+
+// Create a new sub-service
+router.post('/:serviceId/subservices', async (req, res) => {
+  try {
+    const subService = new SubService({
       ...req.body,
       serviceId: req.params.serviceId
-    };
-    
-    console.log('Sub-service data:', subServiceData);
-    
-    const subService = new SubService(subServiceData);
-    await subService.save();
-    
-    console.log('Sub-service created successfully');
-    res.status(201).json({ 
-      success: true, 
-      data: subService,
-      message: 'Sub-service created successfully'
     });
+    
+    await subService.save();
+    res.status(201).json({ success: true, data: subService });
   } catch (error) {
     console.error('Error creating sub-service:', error);
     res.status(400).json({ 
@@ -210,31 +206,22 @@ router.post('/:serviceId/subservices', auth, async (req, res) => {
 });
 
 // Update a sub-service
-router.put('/:serviceId/subservices/:id', auth, async (req, res) => {
+router.put('/:serviceId/subservices/:id', async (req, res) => {
   try {
-    console.log('Updating sub-service:', req.params.id);
-    
-    // Find and update the sub-service
     const subService = await SubService.findOneAndUpdate(
       { _id: req.params.id, serviceId: req.params.serviceId },
       req.body,
       { new: true, runValidators: true }
-    );
+    ).select('-__v');
     
     if (!subService) {
-      console.log('Sub-service not found for update:', req.params.id);
       return res.status(404).json({ 
         success: false, 
         message: 'Sub-service not found' 
       });
     }
     
-    console.log('Sub-service updated successfully');
-    res.json({ 
-      success: true, 
-      data: subService,
-      message: 'Sub-service updated successfully'
-    });
+    res.json({ success: true, data: subService });
   } catch (error) {
     console.error('Error updating sub-service:', error);
     res.status(400).json({ 
@@ -246,29 +233,21 @@ router.put('/:serviceId/subservices/:id', auth, async (req, res) => {
 });
 
 // Delete a sub-service
-router.delete('/:serviceId/subservices/:id', auth, async (req, res) => {
+router.delete('/:serviceId/subservices/:id', async (req, res) => {
   try {
-    console.log('Deleting sub-service:', req.params.id);
-    
-    // Find and delete the sub-service
     const subService = await SubService.findOneAndDelete({
       _id: req.params.id,
       serviceId: req.params.serviceId
     });
     
     if (!subService) {
-      console.log('Sub-service not found for deletion:', req.params.id);
       return res.status(404).json({ 
         success: false, 
         message: 'Sub-service not found' 
       });
     }
     
-    console.log('Sub-service deleted successfully');
-    res.json({ 
-      success: true, 
-      message: 'Sub-service deleted successfully'
-    });
+    res.json({ success: true, message: 'Sub-service deleted successfully' });
   } catch (error) {
     console.error('Error deleting sub-service:', error);
     res.status(500).json({ 
@@ -279,4 +258,4 @@ router.delete('/:serviceId/subservices/:id', auth, async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router; 

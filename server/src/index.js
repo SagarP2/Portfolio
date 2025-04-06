@@ -12,6 +12,7 @@ const serviceRoutes = require('./routes/services');
 const contactRoutes = require('./routes/contact');
 const contentRoutes = require('./routes/content');
 const blogRoutes = require("./routes/blogRoutes");
+// const subServiceRoutes = require('./routes/subServices');
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/content', contentRoutes);
+// app.use('/api/subservices', subServiceRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
