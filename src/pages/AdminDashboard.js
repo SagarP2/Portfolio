@@ -328,7 +328,7 @@ const AdminDashboard = () => {
             Services
           </NavLink>
           <NavLink to="/admin/content" active={location.pathname === '/admin/content'}>
-            Content
+            Blog
           </NavLink>
           <NavLink to="/admin/subservices" active={location.pathname === '/admin/subservices'}>
             Sub-Services
