@@ -401,7 +401,6 @@ const ProjectCard = ({ project, index }) => {
     image = '', 
     technologies = [], 
     githubLink = '#', 
-    demoLink = '',
     createdAt = new Date()
   } = project || {};
   
@@ -522,21 +521,9 @@ const ProjectCard = ({ project, index }) => {
             initial="initial"
             animate="animate"
           >
-            <ProjectLink 
-              href={githubLink} 
-              target="_blank"
-              rel="noopener noreferrer"
-              variants={linkVariants}
-              whileHover="hover"
-              whileTap="tap"
-              className="hoverable"
-            >
-              <GithubIcon /> GitHub
-            </ProjectLink>
-            
-            {demoLink && (
+            {githubLink && (
               <ProjectLink 
-                href={demoLink} 
+                href={githubLink} 
                 target="_blank"
                 rel="noopener noreferrer"
                 variants={linkVariants}
@@ -544,7 +531,7 @@ const ProjectCard = ({ project, index }) => {
                 whileTap="tap"
                 className="hoverable"
               >
-                <ExternalLinkIcon /> Live Demo
+                <GithubIcon /> GitHub
               </ProjectLink>
             )}
             

@@ -8,6 +8,7 @@ import { refreshSession } from '../utils/sessionUtils';
 import ProjectManagement from './admin/ProjectManagement';
 import ServiceManagement from './admin/ServiceManagement';
 import ContentManagement from './admin/ContentManagement';
+import AboutManagement from './admin/AboutManagement';
 import DashboardAnalytics from '../components/DashboardAnalytics';
 
 
@@ -329,7 +330,9 @@ const AdminDashboard = () => {
           <NavLink to="/admin/content" active={location.pathname === '/admin/content'}>
             Blogs 
           </NavLink>
-          
+          <NavLink to="/admin/about" active={location.pathname === '/admin/about'}>
+            About
+          </NavLink>
         </NavSection>
 
         <LogoutButton onClick={handleLogout}>
@@ -347,6 +350,7 @@ const AdminDashboard = () => {
           <Route path="/projects" element={<ProjectManagement />} />
           <Route path="/services" element={<ServiceManagement />} />
           <Route path="/content" element={<ContentManagement />} />
+          <Route path="/about" element={<AboutManagement />} />
         </Routes>
       </MainContent>
     </DashboardContainer>

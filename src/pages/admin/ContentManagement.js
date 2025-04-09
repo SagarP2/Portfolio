@@ -384,20 +384,27 @@ const BlogManagement = () => {
 
       console.log('Submitting with data:', contentData);
       console.log('Config:', config);
+      console.log('Admin token:', localStorage.getItem('admin_token'));
 
       let response;
       if (editingContent) {
         const editUrl = `/api/content/${editingContent._id}`;
-        console.log('Making PUT request to:', editUrl);
+        console.log('Making PATCH request to:', editUrl);
+        console.log('Editing content ID:', editingContent._id);
+        console.log('Editing content full object:', editingContent);
         try {
-          response = await axios.put(editUrl, contentData, config);
+          response = await axios.patch(editUrl, contentData, config);
           console.log('Edit response:', response);
         } catch (editError) {
           console.error('Edit request failed:', {
             url: editUrl,
             error: editError,
             status: editError.response?.status,
-            data: editError.response?.data
+            data: editError.response?.data,
+            headers: editError.response?.headers,
+            config: editError.config,
+            message: editError.message,
+            stack: editError.stack
           });
           throw editError;
         }
@@ -418,7 +425,9 @@ const BlogManagement = () => {
         status: error.response?.status,
         statusText: error.response?.statusText,
         data: error.response?.data,
-        config: error.config
+        config: error.config,
+        headers: error.response?.headers,
+        stack: error.stack
       });
       
       if (error.message === 'Network Error') {

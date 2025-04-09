@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 const Hero = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [animationReady, setAnimationReady] = useState(false);
   
   // Track mouse position for parallax effect
   const handleMouseMove = (e) => {
@@ -13,6 +16,34 @@ const Hero = () => {
     const normalizedY = (clientY / innerHeight) * 2 - 1;
     
     setMousePosition({ x: normalizedX, y: normalizedY });
+  };
+
+  // Delay animation start to avoid conflict with Techveda loader
+  useEffect(() => {
+    // Wait for document to be fully loaded plus additional delay
+    if (document.readyState === 'complete') {
+      // Add a delay after page is fully loaded to ensure Techveda animation is done
+      const timer = setTimeout(() => {
+        setAnimationReady(true);
+      }, 1500); // 1.5 second delay after page load
+      
+      return () => clearTimeout(timer);
+    } else {
+      // If document not yet loaded, wait for load event
+      const handleLoad = () => {
+        const timer = setTimeout(() => {
+          setAnimationReady(true);
+        }, 1500);
+        return () => clearTimeout(timer);
+      };
+      
+      window.addEventListener('load', handleLoad);
+      return () => window.removeEventListener('load', handleLoad);
+    }
+  }, []);
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
   };
   
   return (
@@ -61,30 +92,94 @@ const Hero = () => {
               transition: 'transform 0.1s ease-out'
             }}
           >
-            <div className="relative rounded-2xl overflow-hidden aspect-video lg:aspect-square shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80" 
-                alt="Digital experience" 
-                className="w-full h-full object-cover"
+            <motion.div 
+              className="relative rounded-2xl overflow-hidden aspect-video lg:aspect-square shadow-2xl"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ 
+                opacity: (imageLoaded && animationReady) ? 1 : 0, 
+                scale: (imageLoaded && animationReady) ? 1 : 0.8,
+                y: (imageLoaded && animationReady) ? 0 : 20
+              }}
+              transition={{ 
+                duration: 0.8, 
+                ease: [0.22, 1, 0.36, 1],
+                delay: 0.2
+              }}
+            >
+              <motion.div
+                className="absolute inset-0 bg-primary-500/20 z-10"
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: (imageLoaded && animationReady) ? 0.2 : 0 
+                }}
+                transition={{ duration: 0.5, delay: 0.5 }}
               />
-            </div>
+              <motion.div
+                className="absolute inset-0 z-0"
+                initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
+                animate={{ 
+                  clipPath: (imageLoaded && animationReady) ? "inset(0% 0% 0% 0%)" : "inset(100% 0% 0% 0%)" 
+                }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80" 
+                  alt="Digital experience" 
+                  className="w-full h-full object-cover"
+                  onLoad={handleImageLoad}
+                />
+              </motion.div>
+              
+              {/* Corner accents - removed border and kept only subtle corner elements */}
+              <motion.div 
+                className="absolute top-0 left-0 w-16 h-16 z-30"
+                initial={{ opacity: 0, x: -20, y: -20 }}
+                animate={{ 
+                  opacity: (imageLoaded && animationReady) ? 0.7 : 0, 
+                  x: (imageLoaded && animationReady) ? 0 : -20, 
+                  y: (imageLoaded && animationReady) ? 0 : -20 
+                }}
+                transition={{ duration: 0.6, delay: 1 }}
+              >
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/30 rounded-tl-2xl"></div>
+              </motion.div>
+              <motion.div 
+                className="absolute bottom-0 right-0 w-16 h-16 z-30"
+                initial={{ opacity: 0, x: 20, y: 20 }}
+                animate={{ 
+                  opacity: (imageLoaded && animationReady) ? 0.7 : 0, 
+                  x: (imageLoaded && animationReady) ? 0 : 20, 
+                  y: (imageLoaded && animationReady) ? 0 : 20 
+                }}
+                transition={{ duration: 0.6, delay: 1 }}
+              >
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/30 rounded-br-2xl"></div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
       
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center text-gray-400 animate-bounce">
+      <motion.div 
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center text-gray-400"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: animationReady ? 1 : 0, y: animationReady ? 0 : -20 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
+      >
         <p className="text-sm mb-2 font-body">Scroll Down</p>
-        <svg 
+        <motion.svg 
           xmlns="http://www.w3.org/2000/svg" 
           className="h-6 w-6"
           fill="none" 
           viewBox="0 0 24 24" 
           stroke="currentColor"
+          animate={{ y: [0, 5, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
-      </div>
+        </motion.svg>
+      </motion.div>
     </section>
   );
 };

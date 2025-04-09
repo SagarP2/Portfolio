@@ -315,20 +315,12 @@ const ProjectManagement = () => {
   const [editingProject, setEditingProject] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
-    subtitle: '',
-    mainimage: '',
-    secondaryimage: '',
-    publishedYear: new Date().getFullYear(),
-    shortDescription: '',
-    officialWebsiteLink: '',
-    gitHubLink: '',
-    services: '',
-    industries: '',
-    technicalDescription: '',
-    learningDescription: '',
+    description: '',
+    image: '',
+    githubLink: '',
     technologies: '',
-    demoLink: '',
-    date: new Date().toISOString().split('T')[0]
+    date: '',
+    featured: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useToast();
@@ -365,19 +357,12 @@ const ProjectManagement = () => {
     try {
       const projectData = {
         title: formData.title,
-        subtitle: formData.subtitle,
-        mainimage: formData.mainimage,
-        secondaryimage: formData.secondaryimage,
-        publishedYear: parseInt(formData.publishedYear),
-        shortDescription: formData.shortDescription,
-        officialWebsiteLink: formData.officialWebsiteLink,
-        gitHubLink: formData.gitHubLink,
-        services: formData.services,
-        industries: formData.industries,
-        technicalDescription: formData.technicalDescription,
-        learningDescription: formData.learningDescription,
-        technologies: formData.technologies,
-        demoLink: formData.demoLink
+        description: formData.description,
+        image: formData.image,
+        githubLink: formData.githubLink,
+        technologies: formData.technologies.split(',').map(tech => tech.trim()),
+        date: formData.date,
+        featured: formData.featured
       };
 
       // Add auth token to request headers
@@ -402,20 +387,12 @@ const ProjectManagement = () => {
       setEditingProject(null);
       setFormData({
         title: '',
-        subtitle: '',
-        mainimage: '',
-        secondaryimage: '',
-        publishedYear: new Date().getFullYear(),
-        shortDescription: '',
-        officialWebsiteLink: '',
-        gitHubLink: '',
-        services: '',
-        industries: '',
-        technicalDescription: '',
-        learningDescription: '',
+        description: '',
+        image: '',
+        githubLink: '',
         technologies: '',
-        demoLink: '',
-        date: new Date().toISOString().split('T')[0]
+        date: '',
+        featured: false
       });
       fetchProjects();
     } catch (error) {
@@ -433,21 +410,13 @@ const ProjectManagement = () => {
   const handleEdit = (project) => {
     setEditingProject(project);
     setFormData({
-      title: project.title || '',
-      subtitle: project.subtitle || '',
-      mainimage: project.mainimage || '',
-      secondaryimage: project.secondaryimage || '',
-      publishedYear: project.publishedYear || new Date().getFullYear(),
-      shortDescription: project.shortDescription || '',
-      officialWebsiteLink: project.officialWebsiteLink || '',
-      gitHubLink: project.gitHubLink || '',
-      services: Array.isArray(project.services) ? project.services.join(', ') : '',
-      industries: Array.isArray(project.industries) ? project.industries.join(', ') : '',
-      technicalDescription: project.technicalDescription || '',
-      learningDescription: project.learningDescription || '',
-      technologies: Array.isArray(project.technologies) ? project.technologies.join(', ') : '',
-      demoLink: project.demoLink || '',
-      date: project.createdAt ? new Date(project.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+      title: project.title,
+      description: project.description,
+      image: project.image || '',
+      githubLink: project.githubLink || '',
+      technologies: project.technologies.join(', '),
+      date: project.date,
+      featured: project.featured || false
     });
     setShowModal(true);
   };
@@ -481,6 +450,19 @@ const ProjectManagement = () => {
     }));
   };
 
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      image: '',
+      githubLink: '',
+      technologies: '',
+      date: '',
+      featured: false
+    });
+    setEditingProject(null);
+  };
+
   if (loading) {
     return <Container>Loading...</Container>;
   }
@@ -499,20 +481,12 @@ const ProjectManagement = () => {
             setEditingProject(null);
             setFormData({
               title: '',
-              subtitle: '',
-              mainimage: '',
-              secondaryimage: '',
-              publishedYear: new Date().getFullYear(),
-              shortDescription: '',
-              officialWebsiteLink: '',
-              gitHubLink: '',
-              services: '',
-              industries: '',
-              technicalDescription: '',
-              learningDescription: '',
+              description: '',
+              image: '',
+              githubLink: '',
               technologies: '',
-              demoLink: '',
-              date: new Date().toISOString().split('T')[0]
+              date: '',
+              featured: false
             });
             setShowModal(true);
           }}
@@ -535,7 +509,7 @@ const ProjectManagement = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <ProjectImage src={getImageUrl(project.mainimage)} alt={project.title} />
+            <ProjectImage src={getImageUrl(project.image)} alt={project.title} />
             <ProjectContent>
               <ProjectTitle>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -546,32 +520,23 @@ const ProjectManagement = () => {
               {project.subtitle && (
                 <ProjectSubtitle>{project.subtitle}</ProjectSubtitle>
               )}
-              <ProjectDescription>{project.shortDescription || project.description}</ProjectDescription>
+              <ProjectDescription>{project.description}</ProjectDescription>
               <ProjectMeta>
-                {project.publishedYear && (
+                {project.date && (
                   <MetaItem>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"/>
                       <polyline points="12 6 12 12 16 14"/>
                     </svg>
-                    {project.publishedYear}
+                    {project.date}
                   </MetaItem>
                 )}
-                {project.gitHubLink && (
+                {project.githubLink && (
                   <MetaItem>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
                     </svg>
                     GitHub
-                  </MetaItem>
-                )}
-                {project.officialWebsiteLink && (
-                  <MetaItem>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                    </svg>
-                    Website
                   </MetaItem>
                 )}
               </ProjectMeta>
@@ -642,136 +607,41 @@ const ProjectManagement = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <Label>Subtitle</Label>
-                <Input
-                  type="text"
-                  name="subtitle"
-                  value={formData.subtitle}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Main Image URL</Label>
-                <Input
-                  type="url"
-                  name="mainimage"
-                  value={formData.mainimage}
-                  onChange={handleChange}
-                  placeholder="Enter main image URL"
-                  required
-                />
-                {formData.mainimage && (
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <img 
-                      src={formData.mainimage}
-                      alt="Preview" 
-                      style={{ maxWidth: '200px', marginBottom: '0.5rem' }} 
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/200x150?text=Invalid+Image+URL';
-                      }}
-                    />
-                  </div>
-                )}
-              </FormGroup>
-              <FormGroup>
-                <Label>Secondary Image URL</Label>
-                <Input
-                  type="url"
-                  name="secondaryimage"
-                  value={formData.secondaryimage}
-                  onChange={handleChange}
-                  placeholder="Enter secondary image URL"
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Published Year</Label>
-                <Input
-                  type="number"
-                  name="publishedYear"
-                  value={formData.publishedYear}
-                  onChange={handleChange}
-                  min={1900}
-                  max={new Date().getFullYear()}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Overview</Label>
+                <Label>Description</Label>
                 <TextArea
-                  name="shortDescription"
-                  value={formData.shortDescription}
+                  name="description"
+                  value={formData.description}
                   onChange={handleChange}
                 />
               </FormGroup>
               <FormGroup>
-                <Label>Official Website Link</Label>
+                <Label>Image URL</Label>
                 <Input
                   type="url"
-                  name="officialWebsiteLink"
-                  value={formData.officialWebsiteLink}
+                  name="image"
+                  value={formData.image}
                   onChange={handleChange}
+                  placeholder="Enter image URL"
+                  required
                 />
               </FormGroup>
               <FormGroup>
                 <Label>GitHub Link</Label>
                 <Input
                   type="url"
-                  name="gitHubLink"
-                  value={formData.gitHubLink}
+                  name="githubLink"
+                  value={formData.githubLink}
                   onChange={handleChange}
                 />
               </FormGroup>
               <FormGroup>
-                <Label>Services</Label>
-                <Input
-                  type="text"
-                  name="services"
-                  value={formData.services}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Industries</Label>
-                <Input
-                  type="text"
-                  name="industries"
-                  value={formData.industries}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Technical Description</Label>
-                <TextArea
-                  name="technicalDescription"
-                  value={formData.technicalDescription}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Learning Description</Label>
-                <TextArea
-                  name="learningDescription"
-                  value={formData.learningDescription}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Technologies (comma-separated)</Label>
+                <Label>Technologies</Label>
                 <Input
                   type="text"
                   name="technologies"
                   value={formData.technologies}
                   onChange={handleChange}
                   required
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Demo Link</Label>
-                <Input
-                  type="url"
-                  name="demoLink"
-                  value={formData.demoLink}
-                  onChange={handleChange}
                 />
               </FormGroup>
               <FormGroup>
@@ -782,6 +652,15 @@ const ProjectManagement = () => {
                   value={formData.date}
                   onChange={handleChange}
                   required
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Featured</Label>
+                <Input
+                  type="checkbox"
+                  name="featured"
+                  checked={formData.featured}
+                  onChange={handleChange}
                 />
               </FormGroup>
               <SubmitButton type="submit" disabled={isSubmitting}>
