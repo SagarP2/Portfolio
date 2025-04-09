@@ -30,9 +30,17 @@ const Header = styled.div`
 
 const ProjectsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   padding: 1rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const ProjectCard = styled(motion.div)`
@@ -176,7 +184,7 @@ const ProjectsList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const projectsPerPage = 6; // Number of projects to display per page
+  const projectsPerPage = 6; // Set to display 3 projects per page
 
   useEffect(() => {
     fetchProjects();

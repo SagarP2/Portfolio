@@ -345,7 +345,7 @@ const Projects = () => {
         const response = await axios.get('/api/projects');
         const sortedProjects = response.data.sort((a, b) => 
           new Date(b._id) - new Date(a._id)
-        ).slice(0, 2);
+        ).slice(0, 3);
         setProjects(sortedProjects);
         setLoading(false);
       } catch (error) {
