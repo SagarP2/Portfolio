@@ -9,8 +9,7 @@ import ProjectManagement from './admin/ProjectManagement';
 import ServiceManagement from './admin/ServiceManagement';
 import ContentManagement from './admin/ContentManagement';
 import DashboardAnalytics from '../components/DashboardAnalytics';
-import NewContent from './admin/NewContent';
-import SubServiceManagement from '../components/admin/SubServiceManagement';
+
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -328,11 +327,9 @@ const AdminDashboard = () => {
             Services
           </NavLink>
           <NavLink to="/admin/content" active={location.pathname === '/admin/content'}>
-            Content
+            Blogs 
           </NavLink>
-          <NavLink to="/admin/subservices" active={location.pathname === '/admin/subservices'}>
-            Sub-Services
-          </NavLink>
+          
         </NavSection>
 
         <LogoutButton onClick={handleLogout}>
@@ -350,7 +347,6 @@ const AdminDashboard = () => {
           <Route path="/projects" element={<ProjectManagement />} />
           <Route path="/services" element={<ServiceManagement />} />
           <Route path="/content" element={<ContentManagement />} />
-          <Route path="/subservices" element={<SubServiceManagement />} />
         </Routes>
       </MainContent>
     </DashboardContainer>

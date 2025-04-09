@@ -158,10 +158,10 @@ const DashboardAnalytics = () => {
       const recentBlog = blogs.some(blog => isRecent(blog.date));
 
       setStats({
-        totalProjects: { count: projects.length.toString(), recent: recentProject },
-        totalServices: { count: services.length.toString(), recent: recentService },
-        totalBlogs: { count: blogs.length.toString(), recent: recentBlog },
-        totalVisitors: { count: '0', recent: false }
+        TotalProjects: { count: projects.length.toString(), recent: recentProject },
+        TotalServices: { count: services.length.toString(), recent: recentService },
+        TotalBlogs: { count: blogs.length.toString(), recent: recentBlog },
+        TotalVisitors: { count: '0', recent: false }
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
