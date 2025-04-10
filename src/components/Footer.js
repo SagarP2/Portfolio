@@ -18,7 +18,7 @@ const Footer = () => {
             </p>
             <div className="mt-6 flex space-x-4">
               <a 
-                href="https://github.com" 
+                href="https://github.com/SagarP2" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary-400 transition-colors hoverable"
@@ -40,7 +40,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a 
-                href="https://linkedin.com" 
+                href="https://www.linkedin.com/in/sagar-panchal-79284921a/" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary-400 transition-colors hoverable"
@@ -51,7 +51,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a 
-                href="https://instagram.com" 
+                href="https://www.instagram.com/_sagarpanchal._/" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary-400 transition-colors hoverable"
@@ -79,6 +79,9 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/projects" className="text-gray-400 hover:text-primary-400 transition-colors hoverable">Projects</Link>
+              </li>
+              <li>
+                <Link to="/blog" className="text-gray-400 hover:text-primary-400 transition-colors hoverable">Blog</Link>
               </li>
               <li>
                 <Link to="/contact" className="text-gray-400 hover:text-primary-400 transition-colors hoverable">Contact</Link>
@@ -135,7 +138,7 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="mt-10 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+        <div className="mt-10 pt-3 pb-3 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-500 font-body">&copy; {currentYear} TECHVEDA. All rights reserved.</p>
           <div className="mt-4 md:mt-0 space-x-4">
             <a href="#" className="text-xs text-gray-500 hover:text-primary-400 transition-colors font-body hoverable">Privacy Policy</a>

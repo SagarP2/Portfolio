@@ -653,7 +653,7 @@ const Contact = () => {
               <MapPinIcon />
               <InfoText>
                 <h4>Location</h4>
-                <p>Bengaluru, Karnataka, India</p>
+                <p>Bardoli, Gujarat, India</p>
               </InfoText>
             </InfoItem>
             

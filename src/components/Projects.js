@@ -391,7 +391,7 @@ const Projects = () => {
                 <ProjectSubtitle>{project.subtitle}</ProjectSubtitle>
                 
                 <ProjectLinks>
-                  <ProjectLink 
+                  {/* <ProjectLink 
                     href={project.githubLink} 
                     target="_blank" 
                     rel="noopener noreferrer"
@@ -418,7 +418,7 @@ const Projects = () => {
                       </svg>
                       View Demo
                     </ProjectLink>
-                  )}
+                  )} */}
                 </ProjectLinks>
                 
               <ViewDetailsButton to={`/projects/${project._id}`}>

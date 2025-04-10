@@ -243,11 +243,11 @@ const ProjectsList = () => {
             <ProjectContent>
               <ProjectTitle>{project.title}</ProjectTitle>
               <ProjectDescription>{project.shortDescription}</ProjectDescription>
-              <TechnologiesContainer>
+              {/* <TechnologiesContainer>
                 {project.technologies.map((tech, techIndex) => (
                   <Technology key={techIndex}>{tech}</Technology>
                 ))}
-              </TechnologiesContainer>
+              </TechnologiesContainer> */}
               <ProjectLinks>
                 <GitHubLink href={project.githubLink} target="_blank" rel="noopener noreferrer">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
