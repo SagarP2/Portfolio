@@ -152,6 +152,29 @@ const MetaItem = styled.span`
   }
 `;
 
+const WebsiteLink = styled.a`
+  background: ${props => props.theme.colors.primary}15;
+  color: ${props => props.theme.colors.primary};
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.theme.colors.primary}25;
+    transform: translateY(-2px);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
 const TechnologiesContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -315,12 +338,18 @@ const ProjectManagement = () => {
   const [editingProject, setEditingProject] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
-    image: '',
-    githubLink: '',
-    technologies: '',
-    date: '',
-    featured: false
+    subtitle: '',
+    mainimage: '',
+    secondaryimage: '',
+    publishedYear: '',
+    shortDescription: '',
+    officialWebsiteLink: '',
+    gitHubLink: '',
+    services: '',
+    industries: '',
+    technicalDescription: '',
+    learningDescription: '',
+    technologies: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useToast();
@@ -357,12 +386,18 @@ const ProjectManagement = () => {
     try {
       const projectData = {
         title: formData.title,
-        description: formData.description,
-        image: formData.image,
-        githubLink: formData.githubLink,
-        technologies: formData.technologies.split(',').map(tech => tech.trim()),
-        date: formData.date,
-        featured: formData.featured
+        subtitle: formData.subtitle,
+        mainimage: formData.mainimage,
+        secondaryimage: formData.secondaryimage,
+        publishedYear: formData.publishedYear ? parseInt(formData.publishedYear) : undefined,
+        shortDescription: formData.shortDescription,
+        officialWebsiteLink: formData.officialWebsiteLink,
+        gitHubLink: formData.gitHubLink,
+        services: formData.services.split(',').map(service => service.trim()).filter(service => service),
+        industries: formData.industries.split(',').map(industry => industry.trim()).filter(industry => industry),
+        technicalDescription: formData.technicalDescription,
+        learningDescription: formData.learningDescription,
+        technologies: formData.technologies.split(',').map(tech => tech.trim()).filter(tech => tech)
       };
 
       // Add auth token to request headers
@@ -387,12 +422,18 @@ const ProjectManagement = () => {
       setEditingProject(null);
       setFormData({
         title: '',
-        description: '',
-        image: '',
-        githubLink: '',
-        technologies: '',
-        date: '',
-        featured: false
+        subtitle: '',
+        mainimage: '',
+        secondaryimage: '',
+        publishedYear: '',
+        shortDescription: '',
+        officialWebsiteLink: '',
+        gitHubLink: '',
+        services: '',
+        industries: '',
+        technicalDescription: '',
+        learningDescription: '',
+        technologies: ''
       });
       fetchProjects();
     } catch (error) {
@@ -410,13 +451,19 @@ const ProjectManagement = () => {
   const handleEdit = (project) => {
     setEditingProject(project);
     setFormData({
-      title: project.title,
-      description: project.description,
-      image: project.image || '',
-      githubLink: project.githubLink || '',
-      technologies: project.technologies.join(', '),
-      date: project.date,
-      featured: project.featured || false
+      title: project.title || '',
+      subtitle: project.subtitle || '',
+      mainimage: project.mainimage || '',
+      secondaryimage: project.secondaryimage || '',
+      publishedYear: project.publishedYear || '',
+      shortDescription: project.shortDescription || '',
+      officialWebsiteLink: project.officialWebsiteLink || '',
+      gitHubLink: project.gitHubLink || '',
+      services: project.services ? project.services.join(', ') : '',
+      industries: project.industries ? project.industries.join(', ') : '',
+      technicalDescription: project.technicalDescription || '',
+      learningDescription: project.learningDescription || '',
+      technologies: project.technologies ? project.technologies.join(', ') : ''
     });
     setShowModal(true);
   };
@@ -453,12 +500,18 @@ const ProjectManagement = () => {
   const resetForm = () => {
     setFormData({
       title: '',
-      description: '',
-      image: '',
-      githubLink: '',
-      technologies: '',
-      date: '',
-      featured: false
+      subtitle: '',
+      mainimage: '',
+      secondaryimage: '',
+      publishedYear: '',
+      shortDescription: '',
+      officialWebsiteLink: '',
+      gitHubLink: '',
+      services: '',
+      industries: '',
+      technicalDescription: '',
+      learningDescription: '',
+      technologies: ''
     });
     setEditingProject(null);
   };
@@ -481,12 +534,18 @@ const ProjectManagement = () => {
             setEditingProject(null);
             setFormData({
               title: '',
-              description: '',
-              image: '',
-              githubLink: '',
-              technologies: '',
-              date: '',
-              featured: false
+              subtitle: '',
+              mainimage: '',
+              secondaryimage: '',
+              publishedYear: '',
+              shortDescription: '',
+              officialWebsiteLink: '',
+              gitHubLink: '',
+              services: '',
+              industries: '',
+              technicalDescription: '',
+              learningDescription: '',
+              technologies: ''
             });
             setShowModal(true);
           }}
@@ -538,6 +597,15 @@ const ProjectManagement = () => {
                     </svg>
                     GitHub
                   </MetaItem>
+                )}
+                {project.websiteLink && (
+                  <WebsiteLink href={project.websiteLink} target="_blank" rel="noopener noreferrer">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    Visit Website
+                  </WebsiteLink>
                 )}
               </ProjectMeta>
               <TechnologiesContainer>
@@ -597,7 +665,7 @@ const ProjectManagement = () => {
             <h2>{editingProject ? 'Edit Project' : 'Add New Project'}</h2>
             <Form onSubmit={handleSubmit}>
               <FormGroup>
-                <Label>Title</Label>
+                <Label>Title *</Label>
                 <Input
                   type="text"
                   name="title"
@@ -607,60 +675,122 @@ const ProjectManagement = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <Label>Description</Label>
-                <TextArea
-                  name="description"
-                  value={formData.description}
+                <Label>Subtitle</Label>
+                <Input
+                  type="text"
+                  name="subtitle"
+                  value={formData.subtitle}
                   onChange={handleChange}
                 />
               </FormGroup>
               <FormGroup>
-                <Label>Image URL</Label>
+                <Label>Main Image URL *</Label>
                 <Input
                   type="url"
-                  name="image"
-                  value={formData.image}
+                  name="mainimage"
+                  value={formData.mainimage}
                   onChange={handleChange}
-                  placeholder="Enter image URL"
+                  placeholder="Enter main image URL"
                   required
                 />
               </FormGroup>
               <FormGroup>
-                <Label>GitHub Link</Label>
+                <Label>Secondary Image URL</Label>
                 <Input
                   type="url"
-                  name="githubLink"
-                  value={formData.githubLink}
+                  name="secondaryimage"
+                  value={formData.secondaryimage}
                   onChange={handleChange}
+                  placeholder="Enter secondary image URL"
                 />
               </FormGroup>
               <FormGroup>
-                <Label>Technologies</Label>
+                <Label>Published Year</Label>
+                <Input
+                  type="number"
+                  name="publishedYear"
+                  value={formData.publishedYear}
+                  onChange={handleChange}
+                  placeholder="e.g., 2024"
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Short Description</Label>
+                <TextArea
+                  name="shortDescription"
+                  value={formData.shortDescription}
+                  onChange={handleChange}
+                  placeholder="Brief description of the project"
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Official Website Link</Label>
+                <Input
+                  type="url"
+                  name="officialWebsiteLink"
+                  value={formData.officialWebsiteLink}
+                  onChange={handleChange}
+                  placeholder="https://example.com"
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>GitHub Link *</Label>
+                <Input
+                  type="url"
+                  name="gitHubLink"
+                  value={formData.gitHubLink}
+                  onChange={handleChange}
+                  placeholder="https://github.com/..."
+                  required
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Services (comma-separated)</Label>
+                <Input
+                  type="text"
+                  name="services"
+                  value={formData.services}
+                  onChange={handleChange}
+                  placeholder="Web Development, Mobile Apps, ..."
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Industries (comma-separated)</Label>
+                <Input
+                  type="text"
+                  name="industries"
+                  value={formData.industries}
+                  onChange={handleChange}
+                  placeholder="Healthcare, Finance, ..."
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Technical Description</Label>
+                <TextArea
+                  name="technicalDescription"
+                  value={formData.technicalDescription}
+                  onChange={handleChange}
+                  placeholder="Detailed technical description"
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Learning Description</Label>
+                <TextArea
+                  name="learningDescription"
+                  value={formData.learningDescription}
+                  onChange={handleChange}
+                  placeholder="What was learned from this project"
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Technologies *</Label>
                 <Input
                   type="text"
                   name="technologies"
                   value={formData.technologies}
                   onChange={handleChange}
+                  placeholder="React, Node.js, MongoDB, ..."
                   required
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Date</Label>
-                <Input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Featured</Label>
-                <Input
-                  type="checkbox"
-                  name="featured"
-                  checked={formData.featured}
-                  onChange={handleChange}
                 />
               </FormGroup>
               <SubmitButton type="submit" disabled={isSubmitting}>
