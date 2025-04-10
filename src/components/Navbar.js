@@ -56,7 +56,9 @@ const Navbar = () => {
   ];
   
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled ? 'shadow-md' : ''
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4 md:justify-start md:space-x-10">
           <Link 
@@ -84,9 +86,15 @@ const Navbar = () => {
             className="md:hidden flex items-center hoverable"
           >
             <div className="w-6 h-6 flex flex-col justify-between items-center relative">
-              <span className={`w-full h-0.5 bg-gray-100 transition-all duration-300 transform ${mobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''}`}></span>
-              <span className={`w-full h-0.5 bg-gray-100 transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
-              <span className={`w-full h-0.5 bg-gray-100 transition-all duration-300 transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''}`}></span>
+              <span className={`w-full h-0.5 bg-gray-100 transition-all duration-300 transform ${
+                mobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''
+              }`}></span>
+              <span className={`w-full h-0.5 bg-gray-100 transition-all duration-300 ${
+                mobileMenuOpen ? 'opacity-0' : 'opacity-100'
+              }`}></span>
+              <span className={`w-full h-0.5 bg-gray-100 transition-all duration-300 transform ${
+                mobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''
+              }`}></span>
             </div>
           </button>
         </div>
@@ -94,7 +102,9 @@ const Navbar = () => {
       
       {/* Mobile menu */}
       <div 
-        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}
+        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
+          mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+        }`}
       >
         <div className="px-4 pt-2 pb-6 space-y-6">
           <div className="grid grid-cols-1 gap-y-6">

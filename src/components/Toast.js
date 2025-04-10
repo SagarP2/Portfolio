@@ -38,6 +38,14 @@ const Icon = styled.span`
 
 const ToastContext = React.createContext(null);
 
+export const useToast = () => {
+  const context = React.useContext(ToastContext);
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  return context;
+};
+
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = React.useState([]);
 
@@ -81,12 +89,4 @@ export const ToastProvider = ({ children }) => {
       </ToastContainer>
     </ToastContext.Provider>
   );
-};
-
-export const useToast = () => {
-  const context = React.useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
 }; 

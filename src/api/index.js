@@ -84,7 +84,7 @@ export const deleteService = (id) => API.delete(`/api/services/${id}`);
 // Content API calls
 export const fetchContents = () => API.get('/api/content');
 export const createContent = (content) => API.post('/api/content', content);
-export const updateContent = (id, content) => API.put(`/api/content/${id}`, content);
+export const updateContent = (id, content) => API.patch(`/api/content/${id}`, content);
 export const deleteContent = (id) => API.delete(`/api/content/${id}`);
 
 export default API; 

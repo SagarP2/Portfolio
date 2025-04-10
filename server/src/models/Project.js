@@ -53,10 +53,6 @@ const projectSchema = new mongoose.Schema({
     type: String,
     trim: true
   }],
-  demoLink: {
-    type: String,
-    trim: true
-  },
   createdAt: {
     type: Date,
     default: Date.now
