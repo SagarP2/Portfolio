@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import axios from 'axios';
+
+// Create axios instance with base URL
+const api = axios.create({
+  baseURL: 'http://localhost:5001/api',
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -32,7 +41,7 @@ const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: 3rem;
-
+  
   @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr;
   }
@@ -42,9 +51,8 @@ const ImageContainer = styled.div`
   position: relative;
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
   img {
     width: 100%;
     height: 100%;
@@ -70,138 +78,198 @@ const Highlight = styled.span`
   font-weight: 600;
 `;
 
-const TeamGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  width: 100%;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr; // Stack on smaller screens
-  }
-`;
-
-const TeamMemberCard = styled(motion.div)`
-  background: #1a1a1a;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  color: white;
+const LoadingContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center; // Center align content
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
 `;
 
-const RoleTitle = styled.h2`
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: var(--color-primary);
+const ErrorContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  font-size: 1.2rem;
+  color: #ef4444;
+  text-align: center;
+  padding: 2rem;
 `;
-
-const MemberName = styled.h3`
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-`;
-
-const MemberImage = styled.img`
-  width: 100px; // Set a fixed width for the image
-  height: 100px; // Set a fixed height for the image
-  border-radius: 50%; // Make the image circular
-  margin-bottom: 1rem; // Space between image and text
-`;
-
-// Animation variants
-const containerVariants = {
-  initial: { opacity: 0 },
-  animate: { 
-    opacity: 1,
-    transition: { 
-      duration: 0.5,
-      staggerChildren: 0.1
-    }
-  },
-  exit: { opacity: 0, transition: { duration: 0.3 } }
-};
-
-const itemVariants = {
-  initial: { y: 20, opacity: 0 },
-  animate: { 
-    y: 0, 
-    opacity: 1,
-    transition: { duration: 0.5, ease: 'easeOut' }
-  }
-};
 
 const About = () => {
+  const [aboutData, setAboutData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await api.get('/about');
+        
+        if (!response.data) {
+          throw new Error('No data received from the server');
+        }
+        
+        if (!response.data.title || !response.data.paragraphs) {
+          throw new Error('Invalid data format received from the server');
+        }
+        
+        setAboutData(response.data);
+      } catch (err) {
+        console.error('Error fetching about data:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        });
+        
+        setError(
+          err.response?.data?.message || 
+          err.message || 
+          'Failed to load about content. Please try again later.'
+        );
+        
+        // Set default data if there's an error
+        setAboutData({
+          title: 'About Us',
+          image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+          paragraphs: [
+            'Welcome to Techveda. We are experiencing technical difficulties loading our about content.',
+            'Please try refreshing the page or contact support if the issue persists.'
+          ],
+          highlights: []
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAboutData();
+  }, []);
+
+  // Function to render paragraphs with highlights
+  const renderParagraphs = () => {
+    if (!aboutData || !aboutData.paragraphs) {
+      return null;
+    }
+
+    return aboutData.paragraphs.map((paragraph, index) => {
+      // Check if there are any highlights for this paragraph
+      const paragraphHighlights = aboutData.highlights?.filter(h => h.paragraphIndex === index) || [];
+      
+      if (paragraphHighlights.length === 0) {
+        // No highlights, just render the paragraph
+        return (
+          <Paragraph key={index}>
+            {paragraph}
+          </Paragraph>
+        );
+      }
+      
+      // There are highlights, need to split the paragraph and insert highlights
+      let paragraphText = paragraph;
+      const parts = [];
+      let lastIndex = 0;
+      
+      // Sort highlights by their position in the text
+      const sortedHighlights = [...paragraphHighlights].sort((a, b) => {
+        const aIndex = paragraphText.indexOf(a.text);
+        const bIndex = paragraphText.indexOf(b.text);
+        return aIndex - bIndex;
+      });
+      
+      // Process each highlight
+      for (const highlight of sortedHighlights) {
+        const highlightIndex = paragraphText.indexOf(highlight.text, lastIndex);
+        
+        if (highlightIndex === -1) {
+          continue;
+        }
+        
+        // Add text before the highlight
+        if (highlightIndex > lastIndex) {
+          parts.push(paragraphText.substring(lastIndex, highlightIndex));
+        }
+        
+        // Add the highlighted text
+        parts.push(
+          <Highlight key={`highlight-${index}-${highlightIndex}`}>
+            {highlight.text}
+          </Highlight>
+        );
+        
+        lastIndex = highlightIndex + highlight.text.length;
+      }
+      
+      // Add any remaining text
+      if (lastIndex < paragraphText.length) {
+        parts.push(paragraphText.substring(lastIndex));
+      }
+      
+      return (
+        <Paragraph key={index}>
+          {parts}
+        </Paragraph>
+      );
+    });
+  };
+
+  if (loading) {
+    return (
+      <PageContainer>
+        <ContentContainer>
+          <LoadingContainer>Loading about content...</LoadingContainer>
+        </ContentContainer>
+      </PageContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageContainer>
+        <ContentContainer>
+          <ErrorContainer>{error}</ErrorContainer>
+        </ContentContainer>
+      </PageContainer>
+    );
+  }
+
+  if (!aboutData) {
+    return (
+      <PageContainer>
+        <ContentContainer>
+          <ErrorContainer>No about content available.</ErrorContainer>
+        </ContentContainer>
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer>
       <ContentContainer>
         <Title>{aboutData.title || 'About Us'}</Title>
         <Grid>
-          <ImageContainer variants={itemVariants}>
+          <ImageContainer>
             <img 
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-              alt="Team working together" 
+              src={aboutData.image || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"} 
+              alt="About Techveda" 
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+              }}
             />
           </ImageContainer>
-          <ContentSection variants={containerVariants}>
-            <Paragraph variants={itemVariants}>
-              At <Highlight>Techveda</Highlight>, we believe in the power of technology to transform businesses and enhance lives. Founded in 2020, our journey began with a simple mission: to create digital solutions that make a difference.
-            </Paragraph>
-            <Paragraph variants={itemVariants}>
-              We're a team of passionate designers, developers, and strategists who thrive on solving complex problems through innovative technology. With expertise spanning web development, mobile applications, UI/UX design, and digital marketing, we bring a comprehensive approach to every project.
-            </Paragraph>
-            <Paragraph variants={itemVariants}>
-              What sets us apart is our commitment to understanding your unique needs. We don't just build products; we craft experiences that align with your business goals and resonate with your audience. Our collaborative process ensures that your vision is at the heart of everything we create.
-            </Paragraph>
-            <Paragraph variants={itemVariants}>
-              From startups to established enterprises, we've helped clients across industries elevate their digital presence and achieve measurable results. We're excited about the possibilities that technology brings and look forward to helping you navigate the ever-evolving digital landscape.
-            </Paragraph>
+          <ContentSection>
+            {renderParagraphs()}
           </ContentSection>
         </Grid>
-        <Title variants={itemVariants}>Our Team</Title>
-        <TeamGrid>
-          <TeamMemberCard>
-            <MemberImage
-              src="https://i.pinimg.com/736x/0d/0f/46/0d0f46f7f1397e49a57496db4e167e64.jpg"
-              alt="Sagar"
-            />
-            <RoleTitle>MERN Stack Developer</RoleTitle>
-            <MemberName>Sagar Panchal</MemberName>
-            <Paragraph>
-              Developing and maintaining server-side applications using Node.js
-              and Express.js.
-            </Paragraph>
-            <Paragraph>
-              Managing databases and handling data with MongoDB for efficient
-              storage and retrieval.
-            </Paragraph>
-            <Paragraph>
-              Testing and documenting APIs using Postman to ensure functionality
-              and reliability.
-            </Paragraph>
-          </TeamMemberCard>
-
-          <TeamMemberCard>
-            <MemberImage
-              src="https://i.pinimg.com/736x/97/11/ae/9711ae2ba5f13571a92e852be5878c40.jpg"
-              alt="Priyanshu"
-            />
-            <RoleTitle>Frontend Developer</RoleTitle>
-            <MemberName>Priyanshu Patel</MemberName>
-            <Paragraph>
-              Creating responsive and interactive user interfaces using React.js
-              and CSS.
-            </Paragraph>
-            <Paragraph>
-              Collaborating with backend developers to integrate APIs and
-              enhance user experience.
-            </Paragraph>
-          </TeamMemberCard>
-        </TeamGrid>
       </ContentContainer>
     </PageContainer>
   );
 };
 
-export default About;
+export default About; 

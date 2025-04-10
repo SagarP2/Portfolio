@@ -18,7 +18,7 @@ const Footer = () => {
             </p>
             <div className="mt-6 flex space-x-4">
               <a 
-                href="https://github.com/SagarP2" 
+                href="https://github.com" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary-400 transition-colors hoverable"
@@ -40,7 +40,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a 
-                href="https://www.linkedin.com/in/sagar-panchal-79284921a/" 
+                href="https://linkedin.com" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary-400 transition-colors hoverable"
@@ -51,7 +51,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a 
-                href="https://www.instagram.com/_sagarpanchal._/" 
+                href="https://instagram.com" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary-400 transition-colors hoverable"
@@ -79,9 +79,6 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/projects" className="text-gray-400 hover:text-primary-400 transition-colors hoverable">Projects</Link>
-              </li>
-              <li>
-                <Link to="/blog" className="text-gray-400 hover:text-primary-400 transition-colors hoverable">Blog</Link>
               </li>
               <li>
                 <Link to="/contact" className="text-gray-400 hover:text-primary-400 transition-colors hoverable">Contact</Link>
