@@ -135,7 +135,7 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="mt-10 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+        <div className="mt-10 pt-3 pb-3 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-500 font-body">&copy; {currentYear} TECHVEDA. All rights reserved.</p>
           <div className="mt-4 md:mt-0 space-x-4">
             <a href="#" className="text-xs text-gray-500 hover:text-primary-400 transition-colors font-body hoverable">Privacy Policy</a>
